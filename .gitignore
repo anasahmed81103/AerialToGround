@@ -1,0 +1,13 @@
+# datasets
+data/
+cvpr_subset/
+
+# outputs
+outputs/
+
+# python cache
+__pycache__/
+*.py[cod]
+
+# misc
+*.pdf
