@@ -1,9 +1,9 @@
-from tensorflow.python.ops import control_flow_ops
+import tensorflow.compat.v1 as tf
 import models, misc, os, time, config
 from random import shuffle
-from scipy.misc import imread, imresize, imsave
 import numpy as np
-import tensorflow as tf
+import imageio
+from PIL import Image
 
 class CrossNet(object):
   def __init__(self, sess):
@@ -24,67 +24,93 @@ class CrossNet(object):
     self.image_ground_holder = tf.placeholder(tf.float32, [self.batch_size, None, None, self.szs.C_tar])
     self.label_ground_holder = tf.placeholder(tf.int32,   [self.batch_size, None, None])
 
-    self.build_model([
-      self.image_aerial_holder,
-      self.image_ground_holder,
-      self.label_ground_holder],
-      self.is_training)
+    self.build_model(
+        [self.image_aerial_holder, self.image_ground_holder, self.label_ground_holder],
+        self.is_training)
 
-  def load_data(self, image_list, image_dir=""):
-    """Create a queue that outputs batches of images and labels
-       label 0~3: [sky, bldg, road, tree]
-    """
+  # ------------------------------------------------------------------
+  # Data loading
+  # ------------------------------------------------------------------
+  def load_data(self, image_list, image_dir=''):
     self.data_names = []
     with open(image_list, 'r') as fid:
       for line in fid.readlines():
-        names = [os.path.join(image_dir, name.strip()) for name in line.split(',')]
-        keys = ['im_a', 'im_g', 'lb_g']
-        self.data_names.append(dict(zip(keys, names)))
+        parts = [p.strip() for p in line.strip().split(',')]
+        if len(parts) != 3:
+          continue
+        if image_dir:
+          parts = [os.path.join(image_dir, p) for p in parts]
+        self.data_names.append(dict(zip(['im_a', 'im_g', 'lb_g'], parts)))
     shuffle(self.data_names)
-
     self.num_samples = len(self.data_names)
-    misc.pprint('[*] load %d samples from "%s"' % (self.num_samples, image_list))
+    misc.pprint('[*] loaded %d samples from "%s"' % (self.num_samples, image_list))
 
+  # ------------------------------------------------------------------
+  # Image I/O helpers (scipy-free)
+  # ------------------------------------------------------------------
+  @staticmethod
+  def _load_rgb(path):
+    return np.array(Image.open(path).convert('RGB'))
+
+  @staticmethod
+  def _load_label(path):
+    arr = np.array(Image.open(path))
+    if arr.ndim == 3:
+      arr = arr[..., 0]
+    return arr.astype(np.uint8)
+
+  @staticmethod
+  def _resize_rgb(arr, hw):
+    H, W = hw
+    return np.array(Image.fromarray(arr).resize((W, H), Image.BILINEAR))
+
+  @staticmethod
+  def _resize_label(arr, hw):
+    H, W = hw
+    return np.array(Image.fromarray(arr).resize((W, H), Image.NEAREST))
+
+  # ------------------------------------------------------------------
+  # Batch generator
+  # ------------------------------------------------------------------
   def feed_dict_generator(self):
-    for ib in xrange(0, self.num_samples, self.batch_size):
-      image_aerial_batch = []
-      image_ground_batch = []
-      label_ground_batch = []
-      for ix in xrange(self.batch_size):
-        names = self.data_names[(ib+ix)%self.num_samples]
-        im_a = imread(names['im_a'])
-        im_g = imread(names['im_g'])
-        lb_g = imread(names['lb_g'])
-        im_a = misc.center_crop(im_a, self.szs.image_aerial)
-        im_g = imresize(im_g, self.szs.image_ground)
-        lb_g = imresize(lb_g, self.szs.image_ground, interp='nearest')
-        image_aerial_batch.append(im_a)
-        image_ground_batch.append(im_g)
-        label_ground_batch.append(lb_g)
+    for ib in range(0, self.num_samples, self.batch_size):
+      batch_a, batch_g, batch_l = [], [], []
+      for ix in range(self.batch_size):
+        names = self.data_names[(ib + ix) % self.num_samples]
+        im_a  = self._load_rgb(names['im_a'])
+        im_g  = self._load_rgb(names['im_g'])
+        lb_g  = self._load_label(names['lb_g'])
+        im_a  = misc.center_crop(im_a, self.szs.image_aerial)
+        im_g  = self._resize_rgb(im_g,   self.szs.image_ground)
+        lb_g  = self._resize_label(lb_g, self.szs.image_ground)
+        batch_a.append(im_a); batch_g.append(im_g); batch_l.append(lb_g)
+      yield {
+          self.image_aerial_holder: np.array(batch_a),
+          self.image_ground_holder: np.array(batch_g),
+          self.label_ground_holder: np.array(batch_l),
+      }
 
-      feed_dict = {self.image_aerial_holder: np.array(image_aerial_batch),
-          self.image_ground_holder: np.array(image_ground_batch),
-          self.label_ground_holder: np.array(label_ground_batch)}
-      yield feed_dict
-
+  # ------------------------------------------------------------------
+  # Graph construction
+  # ------------------------------------------------------------------
   def build_model(self, data, is_training=True):
     raw_aerial, raw_ground, label_ground = data
     self.image_aerial = misc.preprocess_image(raw_aerial, self.szs.image_aerial)
     self.image_ground = misc.preprocess_image(raw_ground, self.szs.image_ground)
     self.prob_ground  = misc.preprocess_label(label_ground, self.num_classes, self.szs.after_transf)
-    self.im_aerial = misc.proprocess_image(self.image_aerial)
-    self.im_ground = misc.proprocess_image(self.image_ground)
+    self.im_aerial    = misc.proprocess_image(self.image_aerial)
+    self.im_ground    = misc.proprocess_image(self.image_ground)
 
-    self.feat_aerial = models.pixelnet(self.image_aerial, self.num_classes, 
+    self.feat_aerial = models.pixelnet(
+        self.image_aerial, self.num_classes,
         is_training=is_training, batch_norm=self.batch_norm)
-    misc.pprint(self.feat_aerial.get_shape().as_list()) # print the feature size
+    misc.pprint(self.feat_aerial.get_shape().as_list())
 
-    if is_training:
-      feat_aerial_small = self.feat_aerial
-    else:
-      feat_aerial_small = tf.image.resize_bilinear(self.feat_aerial, self.szs.before_transf)
+    feat_aerial_small = (self.feat_aerial if is_training
+        else tf.image.resize(self.feat_aerial, self.szs.before_transf, method='bilinear'))
 
-    weights = models.compute_transfweights(self.szs.before_transf, self.szs.after_transf, 
+    weights = models.compute_transfweights(
+        self.szs.before_transf, self.szs.after_transf,
         self.conditioned, is_training=is_training, batch_norm=self.batch_norm)
     self.feat_aerial2ground = models.transfnet(feat_aerial_small, weights, self.szs.after_transf)
 
@@ -92,42 +118,53 @@ class CrossNet(object):
       self.merged     = tf.summary.merge_all()
       self.summarizer = tf.summary.FileWriter(self.log_dir, self.sess.graph)
 
-      with tf.name_scope("Loss"):
-        self.loss_class = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
-          None, self.prob_ground, self.feat_aerial2ground))
-        self.loss_reg = tf.add_n(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
+      with tf.name_scope('Loss'):
+        self.loss_class = tf.reduce_mean(
+            tf.nn.softmax_cross_entropy_with_logits_v2(
+                labels=self.prob_ground, logits=self.feat_aerial2ground))
+        reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+        self.loss_reg = tf.add_n(reg_losses) if reg_losses else tf.constant(0.0)
         self.loss = self.loss_class + self.loss_reg
 
-      with tf.name_scope("Optimizer"):
+      with tf.name_scope('Optimizer'):
         with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
-          self.step = tf.Variable(0,name='global_step',trainable=False)
-          self.optim = tf.train.AdamOptimizer(
-            tf.train.exponential_decay(0.001,self.step,5000,.7,staircase=True) # not sure if this is necessary for Adam optimizer
-            ).minimize(self.loss, global_step=self.step)
+          self.step  = tf.Variable(0, name='global_step', trainable=False)
+          lr         = tf.compat.v1.train.exponential_decay(
+              0.001, self.step, 5000, 0.7, staircase=True)
+          self.optim = tf.compat.v1.train.AdamOptimizer(lr).minimize(
+              self.loss, global_step=self.step)
 
-    self.saver = tf.train.Saver(max_to_keep=10, write_version=tf.train.SaverDef.V2)
-    misc.pprint("[*] build model.")
+    self.saver = tf.compat.v1.train.Saver(max_to_keep=10)
+    misc.pprint('[*] model graph built.')
 
     self.transfweights, self.transfbiases = tf.get_collection('transformer_weights')
-    self.prob_aerial = tf.nn.softmax(self.feat_aerial)
-    self.prob_aerial2ground = tf.nn.softmax(self.feat_aerial2ground)
+    self.prob_aerial        = tf.nn.softmax(self.feat_aerial,        axis=-1)
+    self.prob_aerial2ground = tf.nn.softmax(self.feat_aerial2ground, axis=-1)
 
     with tf.name_scope('Vis'):
-      self.visual = [ \
-                    self.image_aerial, self.image_ground,
-                    tf.cast(self.prob_aerial,        tf.float32)/self.num_classes, 
-                    tf.cast(self.prob_ground,        tf.float32)/self.num_classes,
-                    tf.cast(self.prob_aerial2ground, tf.float32)/self.num_classes,
-                    self.transfweights]
+      self.visual = [
+          self.im_aerial,
+          self.im_ground,
+          self.prob_aerial,
+          self.prob_ground,
+          self.prob_aerial2ground,
+          self.transfweights,
+      ]
 
+  # ------------------------------------------------------------------
+  # Checkpoint helpers
+  # ------------------------------------------------------------------
   def restore(self):
-    ckpt = tf.train.get_checkpoint_state(self.ckpt_dir)
+    ckpt = tf.compat.v1.train.get_checkpoint_state(self.ckpt_dir)
     self.saver.restore(self.sess, ckpt.model_checkpoint_path)
-    misc.pprint("[*] restore checkpoint from '%s'." % self.ckpt_dir)
+    misc.pprint('[*] restored checkpoint from "%s".' % self.ckpt_dir)
 
   def save(self):
     self.saver.save(self.sess, '%s/model.ckpt' % self.ckpt_dir, global_step=self.step)
 
+  # ------------------------------------------------------------------
+  # Train / deploy loop
+  # ------------------------------------------------------------------
   def train_test(self):
     if self.is_training:
       tf.global_variables_initializer().run()
@@ -136,28 +173,32 @@ class CrossNet(object):
       self.restore()
       num_epochs = 1
 
-    for iEpoch in xrange(num_epochs):
+    step = 0
+    for iEpoch in range(num_epochs):
       for feed_dict in self.feed_dict_generator():
         if self.is_training:
           tic = time.time()
-          _, summary, loss, step = self.sess.run([self.optim, self.merged, self.loss, self.step], feed_dict)
+          _, summary, loss, step = self.sess.run(
+              [self.optim, self.merged, self.loss, self.step], feed_dict)
           toc = time.time()
-          print("[%d] [%06d] step: %d, loss: %03.5f, (%05.3f s)" 
-              % (iEpoch, step*self.batch_size, step, loss, toc-tic))
+          print('[epoch %d] [step %06d] loss: %.5f  (%.3f s/step)'
+              % (iEpoch, step, loss, toc - tic))
         else:
-          try: step += 1
-          except: step = 1
-          print "[deploy mode] step: {}".format(step)
+          step += 1
+          print('[deploy] step: %d' % step)
 
-        visual  = self.sess.run(self.visual, feed_dict)
+        visual = self.sess.run(self.visual, feed_dict)
 
         if step % 100 == 1 or not self.is_training:
-          montage = misc.to_montage(visual)
+          montage   = misc.to_montage(visual)
           save_path = misc.mkdir_for_file('%s/%06d.jpg' % (self.dump_dir, step))
-          imsave(save_path, montage)
+          imageio.imwrite(save_path, montage)
 
         if self.is_training:
-          if step % 50 == 1: self.summarizer.add_summary(summary, step)
-          if step % self.config.snapshot_iters == 0: self.save()
+          if step % 50 == 1:
+            self.summarizer.add_summary(summary, step)
+          if step % self.config.snapshot_iters == 0:
+            self.save()
 
-    if self.is_training: self.save()
+    if self.is_training:
+      self.save()
