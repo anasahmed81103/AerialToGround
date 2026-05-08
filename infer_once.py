@@ -1,5 +1,13 @@
-"""One-off inference: random aerial from cvpr_train.csv, save predictions under outputs/infer_demo."""
+"""
+One-off inference: random aerial → CrossNet semantic map → GAN ground synthesis.
+
+Stages
+  1. CrossNet  : aerial image (224×224) → semantic logits (8×40)
+  2. GAN       : semantic map (256×512) → synthesised RGB ground panorama  [optional]
+                 (skipped if no GAN checkpoint is found in outputs/ckpts_gan/)
+"""
 import os
+import glob
 import random
 import torch
 import torch.nn.functional as F
@@ -7,10 +15,14 @@ import numpy as np
 from PIL import Image
 import torchvision.transforms.functional as TF
 
-from model import CrossNet
+from model     import CrossNet
+from gan_model import UNetGenerator
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
-CKPT = os.path.join(ROOT, "outputs", "ckpts_pt", "crossnet_step0088830.pt")
+ROOT          = os.path.dirname(os.path.abspath(__file__))
+CROSSNET_CKPT = os.path.join(ROOT, "outputs", "ckpts_pt", "crossnet_step0088830.pt")
+GAN_CKPT_DIR  = os.path.join(ROOT, "outputs", "ckpts_gan")
+GAN_IMG_H, GAN_IMG_W = 256, 512   # resolution GAN was trained at
+NUM_CLASSES   = 4
 
 
 def preprocess_aerial(path: str) -> torch.Tensor:
@@ -28,6 +40,52 @@ def preprocess_aerial(path: str) -> torch.Tensor:
     t = TF.to_tensor(img)
     t = TF.normalize(t, mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     return t.unsqueeze(0)
+
+
+def _load_gan(device: torch.device):
+    """Load the most-recent GAN generator checkpoint; return None if none found."""
+    g_ckpts = sorted(glob.glob(os.path.join(GAN_CKPT_DIR, "G_step*.pt")))
+    if not g_ckpts:
+        print("[!] No GAN checkpoint found in outputs/ckpts_gan/  "
+              "— skipping synthesis stage.  Train first with:  python train_gan.py")
+        return None
+    path = g_ckpts[-1]
+    print(f"[*] Loading GAN generator from {path}")
+    G = UNetGenerator(in_ch=NUM_CLASSES, ngf=64).to(device)
+    ck = torch.load(path, map_location=device, weights_only=False)
+    G.load_state_dict(ck['model'])
+    G.eval()
+    return G
+
+
+def _semantic_logits_to_gan_input(Lg: torch.Tensor, device: torch.device) -> torch.Tensor:
+    """
+    Convert CrossNet ground logits → GAN input tensor.
+
+    Lg shape : (1, C, 8, 40)   — raw ground logits from CrossNet
+    Returns  : (1, C, 256, 512) float32 one-hot in [−1, 1]
+    """
+    cls_map = Lg.argmax(dim=1)                                  # (1, 8, 40)  long
+    # One-hot: (1, C, 8, 40)
+    B, C, H, W = Lg.shape
+    one_hot = torch.zeros(B, C, H, W, device=device)
+    one_hot.scatter_(1, cls_map.unsqueeze(1), 1.0)
+    # Upsample to GAN resolution using nearest to keep hard boundaries
+    one_hot = F.interpolate(one_hot, size=(GAN_IMG_H, GAN_IMG_W),
+                            mode='nearest')                      # (1, C, 256, 512)
+    # Normalise: 0 → −1, 1 → +1
+    return one_hot * 2.0 - 1.0
+
+
+def _synthesise_rgb(G: UNetGenerator, gan_input: torch.Tensor,
+                    out_size: tuple) -> Image.Image:
+    """Run GAN generator and return a PIL image resized to out_size (H, W)."""
+    with torch.no_grad():
+        fake = G(gan_input)                                      # (1, 3, 256, 512) in [−1,1]
+    fake_up = F.interpolate(fake, size=out_size, mode='bilinear', align_corners=True)
+    arr = ((fake_up[0].cpu().float().numpy() * 0.5 + 0.5) * 255
+           ).clip(0, 255).astype(np.uint8).transpose(1, 2, 0)
+    return Image.fromarray(arr)
 
 
 def _load_ground_panorama(path: str) -> Image.Image:
@@ -49,12 +107,17 @@ def main():
     ground_path = os.path.join(ROOT, ground_rel)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # ── Stage 1: CrossNet ────────────────────────────────────────────────────
     model = CrossNet(
-        num_classes=4, conditioned=True, pretrained=False
+        num_classes=NUM_CLASSES, conditioned=True, pretrained=False
     ).to(device)
-    ck = torch.load(CKPT, map_location=device, weights_only=False)
+    ck = torch.load(CROSSNET_CKPT, map_location=device, weights_only=False)
     model.load_state_dict(ck["model"])
     model.eval()
+
+    # ── Stage 2: GAN generator (optional) ───────────────────────────────────
+    G = _load_gan(device)
 
     x = preprocess_aerial(img_path).to(device)
     with torch.no_grad():
@@ -112,6 +175,25 @@ def main():
     montage.paste(pred_rgb, (w1 + w2, 0))
     montage.save(os.path.join(out_dir, f"{base}_aerial__ground_real__pred.png"))
 
+    # ── GAN synthesis: semantic → RGB ground view ────────────────────────────
+    if G is not None:
+        gan_input   = _semantic_logits_to_gan_input(Lg, device)
+        synth_img   = _synthesise_rgb(G, gan_input, out_size=(224, 1232))
+        synth_path  = os.path.join(out_dir, f"{base}_ground_synthesised_gan.png")
+        synth_img.save(synth_path)
+
+        # Side-by-side comparison: aerial | real ground | semantic pred | GAN synthesis
+        montage4 = Image.new("RGB",
+                             (aerial_show.width + ground_real.width
+                              + pred_rgb.width + synth_img.width, 224),
+                             (32, 32, 32))
+        montage4.paste(aerial_show, (0, 0))
+        montage4.paste(ground_real, (aerial_show.width, 0))
+        montage4.paste(pred_rgb,    (aerial_show.width + ground_real.width, 0))
+        montage4.paste(synth_img,   (aerial_show.width + ground_real.width + pred_rgb.width, 0))
+        montage4.save(os.path.join(out_dir, f"{base}_aerial__real__sem__gan.png"))
+        print(f"[*] GAN synthesis saved → {synth_path}")
+
     pa = prob_a[0].detach().cpu().numpy()
     pa_img = (pa * 255.0 / pa.max(axis=0, keepdims=True).clip(1e-6)).astype(np.uint8)
     pa_img = np.transpose(pa_img, (1, 2, 0))
@@ -120,14 +202,13 @@ def main():
             os.path.join(out_dir, f"{base}_aerial_sem_17x17.png")
         )
 
-    print(f"[*] device: {device}")
-    print(f"[*] aerial: {img_path}")
-    print(f"[*] ground (real RGB): {ground_path}")
-    print(f"[*] saved: {out_dir}")
-    print(
-        "[*] Note: CrossNet predicts semantic maps only; "
-        "'ground_real' is the dataset street-view photo for this aerial pair."
-    )
+    print(f"[*] device        : {device}")
+    print(f"[*] aerial        : {img_path}")
+    print(f"[*] ground (real) : {ground_path}")
+    print(f"[*] saved         : {out_dir}")
+    if G is None:
+        print("[*] Tip: run 'python train_gan.py --max_samples 5000 --epochs 20' "
+              "to train the GAN, then re-run this script for full RGB synthesis.")
 
 
 if __name__ == "__main__":
