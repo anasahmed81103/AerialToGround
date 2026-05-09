@@ -1,5 +1,5 @@
 """
-train_gan.py  —  Pix2Pix GAN: semantic labels → real ground-view panoramas
+train_gan_pix2pix.py  —  Pix2Pix GAN: semantic labels → real ground-view panoramas
 ===========================================================================
 Stage 2 of the pipeline
   CrossNet  (already trained) : aerial image  → semantic segmentation map
@@ -12,14 +12,14 @@ CrossNet's predicted labels are fed in as a drop-in replacement.
 Usage
 -----
   # Full training (35 k samples, ~3 h/epoch on P1000 — use --max_samples for faster runs)
-  python train_gan.py
+  python train_gan_pix2pix.py
 
   # Quick demo: 5 000 samples, 20 epochs ≈ 1–2 h total
-  python train_gan.py --max_samples 5000 --epochs 20
+  python train_gan_pix2pix.py --max_samples 5000 --epochs 20
 
   # Resume from a checkpoint pair
-  python train_gan.py --resume_g outputs/ckpts_gan/G_step0010000.pt \
-                      --resume_d outputs/ckpts_gan/D_step0010000.pt
+  python train_gan_pix2pix.py --resume_g outputs/ckpts_gan/G_step0010000.pt \
+                               --resume_d outputs/ckpts_gan/D_step0010000.pt
 
 Outputs
 -------
@@ -39,7 +39,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from torch.amp import GradScaler, autocast
 
-from gan_model import UNetGenerator, PatchDiscriminator
+from gan_unet_model import UNetGenerator, PatchDiscriminator
 
 
 # ──────────────────────────────────────────────────────────────────────────────

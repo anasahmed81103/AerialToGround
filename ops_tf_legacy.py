@@ -1,3 +1,10 @@
+"""
+ops_tf_legacy.py  —  TensorFlow 1 spatial operation helpers (legacy)
+======================================================================
+TF utilities: constant_variable, forward/backward feature-map coordinate
+tracing, bilinear interpolation, and multi-scale feature gathering.
+Used by layers_tf_legacy.py.
+"""
 import tensorflow.compat.v1 as tf
 import numpy as np
 

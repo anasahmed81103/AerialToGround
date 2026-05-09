@@ -1,3 +1,9 @@
+"""
+train_crossnet_tf_legacy.py  —  TensorFlow 1 CrossNet training entry point (legacy)
+====================================================================================
+Original TF1 implementation of CrossNet training.
+For the current PyTorch implementation, use train_crossnet.py instead.
+"""
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'       # suppress TF C++ INFO/WARNING noise
 
@@ -12,7 +18,7 @@ import tensorflow.compat.v1 as tf
 tf.disable_eager_execution()
 tf.logging.set_verbosity(tf.logging.ERROR)
 
-import misc, config, crossnet
+import utils_tf_legacy as misc, config_tf_legacy as config, crossnet_tf_legacy as crossnet
 
 def main(_):
   cfg = config.default_config

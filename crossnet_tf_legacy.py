@@ -1,5 +1,11 @@
+"""
+crossnet_tf_legacy.py  —  CrossNet class for TensorFlow 1 (legacy)
+====================================================================
+Original TF1 CrossNet graph, train/deploy loop, and checkpoint saving.
+For the current PyTorch model, see crossnet_model.py.
+"""
 import tensorflow.compat.v1 as tf
-import models, misc, os, time, config
+import layers_tf_legacy as models, utils_tf_legacy as misc, config_tf_legacy as config, os, time
 from random import shuffle
 import numpy as np
 import imageio

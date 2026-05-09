@@ -1,6 +1,13 @@
+"""
+layers_tf_legacy.py  —  TensorFlow 1 CrossNet graph layers (legacy)
+=====================================================================
+TF-Slim building blocks: hypercolumn pixelnet, normalised (i,j,y,x) indexing,
+conditioned weight MLP, softmax transfer matrix, and transfnet matmul+bias.
+Used by crossnet_tf_legacy.py.
+"""
 import tensorflow.compat.v1 as tf
 import tf_slim as slim
-import ops, nets
+import ops_tf_legacy as ops, backbone_tf_legacy as nets
 import numpy as np
 
 def pixelnet_convs(inputs, num_class, is_training=True, reuse=False):

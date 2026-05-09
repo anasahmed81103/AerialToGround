@@ -1,5 +1,5 @@
 """
-dataset.py  —  PyTorch Dataset for CVPR (CVUSA subset) cross-view data
+crossnet_dataset.py  —  PyTorch Dataset for CVPR (CVUSA subset) cross-view data
 ========================================================================
 CSV format (one sample per line):
     aerial_path, ground_path, label_path

@@ -1,10 +1,13 @@
 """
-One-off inference: random aerial → CrossNet semantic map → GAN ground synthesis.
-
-Stages
+infer_random_demo.py  —  Random-sample inference demo
+======================================================
+Picks a random image from cvpr_train.csv and runs the full pipeline:
   1. CrossNet  : aerial image (224×224) → semantic logits (8×40)
   2. GAN       : semantic map (256×512) → synthesised RGB ground panorama  [optional]
                  (skipped if no GAN checkpoint is found in outputs/ckpts_gan/)
+
+For a proper pipeline that accepts any input image and shows results on screen,
+use aerial_to_ground_final.py instead.
 """
 import os
 import glob
@@ -15,8 +18,8 @@ import numpy as np
 from PIL import Image
 import torchvision.transforms.functional as TF
 
-from model     import CrossNet
-from gan_model import UNetGenerator
+from crossnet_model import CrossNet
+from gan_unet_model import UNetGenerator
 
 ROOT          = os.path.dirname(os.path.abspath(__file__))
 CROSSNET_CKPT = os.path.join(ROOT, "outputs", "ckpts_pt", "crossnet_step0088830.pt")
@@ -47,7 +50,7 @@ def _load_gan(device: torch.device):
     g_ckpts = sorted(glob.glob(os.path.join(GAN_CKPT_DIR, "G_step*.pt")))
     if not g_ckpts:
         print("[!] No GAN checkpoint found in outputs/ckpts_gan/  "
-              "— skipping synthesis stage.  Train first with:  python train_gan.py")
+              "— skipping synthesis stage.  Train first with:  python train_gan_pix2pix.py")
         return None
     path = g_ckpts[-1]
     print(f"[*] Loading GAN generator from {path}")
@@ -207,7 +210,7 @@ def main():
     print(f"[*] ground (real) : {ground_path}")
     print(f"[*] saved         : {out_dir}")
     if G is None:
-        print("[*] Tip: run 'python train_gan.py --max_samples 5000 --epochs 20' "
+        print("[*] Tip: run 'python train_gan_pix2pix.py --max_samples 5000 --epochs 20' "
               "to train the GAN, then re-run this script for full RGB synthesis.")
 
 

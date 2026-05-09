@@ -1,10 +1,10 @@
 """
-train.py  —  CrossNet PyTorch training script
-=============================================
+train_crossnet.py  —  CrossNet PyTorch training script
+======================================================
 Usage:
-    python train.py                              # default: cvpr_train.csv, batch=4, 10 epochs
-    python train.py --csv cvpr_train.csv --batch_size 2 --epochs 20
-    python train.py --no_conditioned             # unconditioned variant
+    python train_crossnet.py                              # default: cvpr_train.csv, batch=4, 10 epochs
+    python train_crossnet.py --csv cvpr_train.csv --batch_size 2 --epochs 20
+    python train_crossnet.py --no_conditioned             # unconditioned variant
 
 GPU:  automatically uses CUDA if available (Quadro P1000 with CUDA 12.x)
 AMP:  mixed-precision (FP16 forward + FP32 master weights) to fit 4 GB VRAM
@@ -19,8 +19,8 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torch.amp import GradScaler, autocast
 
-from model   import CrossNet
-from dataset import CVPRDataset
+from crossnet_model   import CrossNet
+from crossnet_dataset import CVPRDataset
 
 
 # ──────────────────────────────────────────────────────────────────────

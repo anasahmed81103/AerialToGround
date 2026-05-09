@@ -1,3 +1,9 @@
+"""
+backbone_tf_legacy.py  —  TensorFlow 1 VGG-like backbone (legacy)
+===================================================================
+TF-Slim VGG-16-style feature extractor with VALID padding and base_arg_scope.
+Used by layers_tf_legacy.py.
+"""
 import tensorflow.compat.v1 as tf
 import tf_slim as slim
 from contextlib import contextmanager
