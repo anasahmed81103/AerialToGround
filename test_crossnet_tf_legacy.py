@@ -1,7 +1,7 @@
 """
-test_forward.py
----------------
-Sanity-check the full CrossNet forward pass on the 5 demo samples.
+test_crossnet_tf_legacy.py
+--------------------------
+Sanity-check the full TF1 CrossNet forward pass on the 5 demo samples.
 
 Run:
     python test_forward.py
@@ -30,7 +30,7 @@ tf.disable_eager_execution()
 tf.logging.set_verbosity(tf.logging.ERROR)
 
 import numpy as np
-import misc, config, crossnet
+import utils_tf_legacy as misc, config_tf_legacy as config, crossnet_tf_legacy as crossnet
 
 DATA_DIR  = 'data/'
 DATA_LIST = DATA_DIR + 'data.csv'

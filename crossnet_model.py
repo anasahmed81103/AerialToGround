@@ -1,5 +1,5 @@
 """
-model.py  —  CrossNet re-implemented in PyTorch
+crossnet_model.py  —  CrossNet re-implemented in PyTorch
 ================================================
 Architecture (identical to paper arXiv:1612.02709):
 

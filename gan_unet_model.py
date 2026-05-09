@@ -1,5 +1,5 @@
 """
-gan_model.py  —  Pix2Pix-style GAN for semantic-map → ground-RGB synthesis
+gan_unet_model.py  —  Pix2Pix-style GAN for semantic-map → ground-RGB synthesis
 ===========================================================================
 Architecture
   Generator    : 8-stage U-Net  (ngf=64, instance norm, dropout on first 3 decoder blocks)

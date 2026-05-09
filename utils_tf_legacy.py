@@ -1,3 +1,10 @@
+"""
+utils_tf_legacy.py  —  TensorFlow 1 utility helpers (legacy)
+=============================================================
+Shared helpers: mkdir, TF image/label preprocessing, numpy centre-crop,
+montage assembly, and pretty-print wrappers.
+Used by crossnet_tf_legacy.py, train_crossnet_tf_legacy.py, and test_crossnet_tf_legacy.py.
+"""
 import tensorflow.compat.v1 as tf
 import pprint, os
 import numpy as np

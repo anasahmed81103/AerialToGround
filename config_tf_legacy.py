@@ -1,4 +1,9 @@
-""" Default configuration """
+"""
+config_tf_legacy.py  —  TensorFlow 1 CrossNet configuration flags (legacy)
+===========================================================================
+Defines tf.app.flags defaults (epochs, batch size, CSV paths, size containers).
+Used by train_crossnet_tf_legacy.py and test_crossnet_tf_legacy.py.
+"""
 import tensorflow.compat.v1 as tf
 
 flags = tf.app.flags
