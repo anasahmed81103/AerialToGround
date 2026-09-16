@@ -1,17 +1,50 @@
-# ── PyTorch stack (primary - GPU training on Windows) ─────────────────────
-# Install with:
-#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
-# (cu124 wheels are backward-compatible with CUDA 12.5 driver)
+# ===========================================================================
+# CrossViewNet — Python Dependencies
+# ===========================================================================
+#
+# Quick install (CPU-only):
+#   pip install -r requirements.txt
+#
+# GPU install (recommended — CUDA 12.x):
+#   pip install -r requirements.txt
+#   pip install torch==2.3.0 torchvision==0.18.0 --index-url https://download.pytorch.org/whl/cu121
+#
+# GPU install (CUDA 11.8 for older cards):
+#   pip install -r requirements.txt
+#   pip install torch==2.3.0 torchvision==0.18.0 --index-url https://download.pytorch.org/whl/cu118
+#
+# macOS (Apple Silicon MPS):
+#   pip install -r requirements.txt
+#   pip install torch==2.3.0 torchvision==0.18.0
+#
+# ===========================================================================
+
+# ── Core deep learning ─────────────────────────────────────────────────────
+# Install PyTorch separately (see header above) to get the right CUDA build.
+# These are the minimum pinned versions tested with this project.
 torch>=2.0.0
 torchvision>=0.15.0
-Pillow>=9.0.0
-numpy>=1.23.0
 
-# ── TensorFlow stack (legacy reference implementation) ────────────────────
-# GPU on Windows NOT supported by TF 2.11+; kept for CPU-based reference only.
-# tensorflow>=2.4.0
-# tf-slim>=1.1.0
+# ── Image processing ────────────────────────────────────────────────────────
+Pillow>=9.5.0
+imageio>=2.28.0
+numpy>=1.24.0
 
-# ── Shared utilities ──────────────────────────────────────────────────────
-imageio>=2.22.0
-scipy>=1.9.0
+# ── Visualisation ──────────────────────────────────────────────────────────
+matplotlib>=3.7.0
+
+# ── Scientific utilities ────────────────────────────────────────────────────
+scipy>=1.11.0
+
+# ── Live webcam demo (optional — only needed for webcam_demo.py) ────────────
+# opencv-python>=4.8.0
+
+# ── Development / notebook ─────────────────────────────────────────────────
+# jupyter>=1.0.0
+# ipykernel>=6.0.0
+
+# ===========================================================================
+# NOT INCLUDED: TensorFlow / tf-slim
+# The _tf_legacy.py files are kept as reference only.
+# TF 2.11+ does not support GPU on Windows; all training uses PyTorch.
+# ===========================================================================
