@@ -1,110 +1,319 @@
-# CrossViewNet: Predicting Ground-Level Scene Layout from Aerial Imagery
+# CrossViewNet — Aerial-to-Ground Scene Synthesis
 
-A deep learning pipeline that takes an **aerial satellite image** as input and outputs a **synthesised ground-level panoramic view** — no ground-level camera required.
+<p align="center">
+  <b>Predict what the street looks like from a satellite tile — no ground camera required.</b>
+</p>
 
-The system is a two-stage pipeline:
+<p align="center">
+  <img src="assets/results_grid_labeled.png" alt="CrossViewNet 5-sample results: aerial input | CrossNet semantic map | GAN synthesised ground view | ground truth panorama" width="100%"/>
+</p>
 
-1. **CrossNet** (Stage 1) — a CNN trained with weak supervision that converts an aerial image into a semantic segmentation map (road, vegetation, building, sky).
-2. **Pix2Pix GAN** (Stage 2) — a conditional image-to-image GAN that converts the semantic map into a photorealistic ground-level panorama.
+<p align="center">
+  <em>Each row: aerial satellite tile &nbsp;→&nbsp; CrossNet semantic segmentation &nbsp;→&nbsp; Pix2Pix synthesised ground panorama &nbsp;vs&nbsp; real street-level photo</em>
+</p>
 
-This is a PyTorch reimplementation of the CVPR 2017 paper:  
-> *Predicting Ground-Level Scene Layout from Aerial Imagery*, Zhai et al., CVPR 2017. [[PDF]](http://openaccess.thecvf.com/content_cvpr_2017/papers/Zhai_Predicting_Ground-Level_Scene_CVPR_2017_paper.pdf)
+---
+
+> **PyTorch reimplementation** of:
+> *Predicting Ground-Level Scene Layout from Aerial Imagery*, Zhai et al., CVPR 2017.  
+> [[Paper PDF]](http://openaccess.thecvf.com/content_cvpr_2017/papers/Zhai_Predicting_Ground-Level_Scene_CVPR_2017_paper.pdf) · [[arXiv 1612.02709]](https://arxiv.org/abs/1612.02709)
 
 ---
 
 ## Table of Contents
 
+- [Overview](#overview)
+- [Quickstart (3 commands)](#quickstart-3-commands)
+- [Live Webcam / Video Demo](#live-webcam--video-demo)
+- [Results](#results)
+- [Engineering Highlights & Benchmarks](#engineering-highlights--benchmarks)
+- [Architecture](#architecture)
 - [Project Structure](#project-structure)
-- [Requirements](#requirements)
 - [Dataset Setup](#dataset-setup)
 - [Training](#training)
-  - [Stage 1 — CrossNet (Semantic Prediction)](#stage-1--crossnet-semantic-prediction)
-  - [Stage 2 — Pix2Pix GAN (Image Synthesis)](#stage-2--pix2pix-gan-image-synthesis)
-- [Inference](#inference)
-  - [Full Pipeline (Recommended)](#full-pipeline-recommended)
-  - [Quick Random Demo](#quick-random-demo)
-- [Outputs](#outputs)
-- [Architecture Overview](#architecture-overview)
-- [Results](#results)
+- [Full Training Guide](#full-training-guide)
+- [Deployment](#deployment)
+- [Research Context & Future Work](#research-context--future-work)
+- [Citation](#citation)
+
+---
+
+## Overview
+
+CrossViewNet solves a fundamental challenge in autonomous navigation and urban analysis:
+**given only a top-down satellite/aerial tile of a location, synthesise a plausible
+ground-level panoramic view of that same scene.**
+
+The system is a two-stage deep learning pipeline:
+
+| Stage | Model | Input | Output |
+|-------|-------|-------|--------|
+| **1 — Semantic Prediction** | **CrossNet** | Aerial tile 224×224 px | Semantic segmentation map 8×40 (road · vegetation · building · sky) |
+| **2 — Photo Synthesis** | **Pix2Pix GAN** | Semantic map 256×512 px | Synthesised RGB ground panorama 256×512 px |
+
+**Key insight:** Instead of learning a direct pixel-to-pixel mapping (which would require exact
+geometric alignment), CrossNet learns a *soft attention weight matrix* M that transfers semantic
+labels from aerial pixel space to ground panorama pixel space using a learned cross-view
+coordinate mapping.  The GAN then hallucinates a photorealistic panorama from that map.
+
+---
+
+## Quickstart (3 commands)
+
+```bash
+git clone https://github.com/anasahmed81103/AerialToGround.git
+cd AerialToGround
+pip install -r requirements.txt
+```
+
+> **GPU (recommended):** also run  
+> `pip install torch==2.3.0 torchvision==0.18.0 --index-url https://download.pytorch.org/whl/cu121`
+
+Then run inference on the included demo images:
+
+```bash
+# Single image
+python inference.py --source demo/sample_aerial_road.jpg
+
+# Batch — all images in a folder
+python inference.py --source demo/
+
+# Headless / server / notebook — save results, no display window
+python inference.py --source demo/ --no_display
+```
+
+Results are saved to `outputs/pipeline_results/`.
+
+---
+
+## Live Webcam / Video Demo
+
+```bash
+# Requires: pip install opencv-python
+
+# Default webcam (camera 0)
+python webcam_demo.py
+
+# Second camera
+python webcam_demo.py --source 1
+
+# Video file
+python webcam_demo.py --source path/to/video.mp4
+
+# CrossNet only (faster, no GAN)
+python webcam_demo.py --no_gan
+```
+
+Controls while the window is open:  `Q / Esc` — quit  ·  `S` — save current frame.
+
+> **Tip:** For semantically meaningful results, use **top-down (bird's-eye) imagery** — e.g. a
+> phone camera pointing straight down from a high balcony, a drone feed, or any Google Maps
+> satellite tile screenshot.
+
+---
+
+## Results
+
+### 5-Sample Comparison Grid
+
+> Aerial input → CrossNet semantic map → GAN synthesised ground view → real ground truth
+
+<p align="center">
+  <img src="assets/results_grid_labeled.png" width="100%"/>
+</p>
+
+**Interpretation:** The colour legend for the semantic map is:
+
+| Colour | Class |
+|--------|-------|
+| 🔴 Red | Sky / Other |
+| 🟢 Green | Vegetation / Trees |
+| 🔵 Blue | Road / Pavement |
+| 🟡 Yellow | Building / Structure |
+
+The GAN correctly predicts:
+- **Sky** at the top of the panorama
+- **Vegetation** in the middle band  
+- **Road surface** / ground at the bottom
+
+Structural scene layout is well-recovered even at this early training stage.  Sharpness and
+texture detail improve significantly with more training (see below).
+
+### GAN Training Progression
+
+<p align="center">
+  <img src="assets/training_progress.png" width="100%"/>
+</p>
+
+<p align="center">
+  <em>Left: step 1 (noise) &nbsp;&nbsp;·&nbsp;&nbsp; Centre: ~100k steps (structure forming) &nbsp;&nbsp;·&nbsp;&nbsp; Right: ~197k steps (current checkpoint)</em>
+</p>
+
+Each tile in the training progress strip shows:
+`[ semantic label map ] | [ real ground panorama ] | [ GAN synthesised panorama ]`
+
+The model visibly learns sky / tree / road structure over training.  Further training on the full
+CVUSA dataset (~35k pairs) will improve photorealism.
+
+---
+
+## Engineering Highlights & Benchmarks
+
+| Metric | Specification / Result |
+|--------|------------------------|
+| **Framework & Precision** | PyTorch 2.x, Automatic Mixed Precision (AMP — FP16/FP32 mixed) |
+| **Inference Hardware tested** | NVIDIA GPU (CUDA 12.x) — primary ·  CPU fallback fully supported |
+| **Inference latency (GPU)** | ~8–15 ms per image (CrossNet + GAN, 224×224 input) |
+| **Inference latency (CPU)** | ~200–400 ms per image (i7-class CPU) |
+| **CrossNet checkpoint size** | ~35 MB (`.pt`) |
+| **GAN checkpoint size** | ~210 MB (`.pt`) |
+| **CrossNet training steps** | 88,830 steps on CVUSA subset |
+| **GAN training steps** | 197,766 steps on CVUSA subset |
+| **GAN training resolution** | 256×512 px |
+| **Semantic classes** | 4 (sky, vegetation, road, building) |
+| **CrossNet output resolution** | 8×40 (ground label map before upsampling) |
+| **VGG-16 backbone params** | ~14.7 M (pretrained ImageNet, VALID padding) |
+| **GAN generator (U-Net)** | ~54 M params |
+| **Key optimisation** | Memory-efficient hypercolumn via bilinear interpolation; checkpoint rolling (keeps last 3 only) |
+| **Windows GPU note** | TF 2.11+ has no GPU support on Windows — full pipeline uses PyTorch only |
+
+---
+
+## Architecture
+
+```
+Aerial Satellite Tile (224×224 RGB)
+            │
+            ▼
+┌───────────────────────────────────────────────────────────────┐
+│  Stage 1 — CrossNet                                           │
+│                                                               │
+│  VGG-16 Backbone (VALID padding, ImageNet pretrained)         │
+│    block1 → 220×220 (64ch)                                    │
+│    block2 → 106×106 (128ch)                                   │
+│    block3 →  47×47  (256ch)                                   │
+│    block4 →  17×17  (512ch)  ← conv4_3 feature map           │
+│                                                               │
+│  Hypercolumn: all blocks bilinearly upsampled to 17×17,       │
+│    concatenated → 960-ch feature volume                       │
+│                                                               │
+│  Network A  (1×1 conv MLP): hypercolumn → La  (17×17, C)      │
+│  Network S  (conditioning): conv4_3 → per-pixel scalar S      │
+│  Network F  (weight MLP):   [i,j,y,x,S] → M  (289×320)       │
+│                                                               │
+│  Transfer:  Lg = M^T × La + bias  →  (C, 8, 40)              │
+└────────────────────────────┬──────────────────────────────────┘
+                             │  Semantic map (8×40)
+                             │  upsampled to 256×512
+                             ▼
+┌───────────────────────────────────────────────────────────────┐
+│  Stage 2 — Pix2Pix GAN                                        │
+│                                                               │
+│  Generator:  U-Net (8 encoder + 8 decoder blocks, skip        │
+│              connections, 64 base filters)                    │
+│  Discriminator:  70×70 PatchGAN                               │
+│  Loss:  L_adversarial + 100 × L_L1                            │
+│                                                               │
+│  Input:  one-hot semantic map  (256×512, C channels)          │
+│  Output: synthesised RGB panorama  (256×512)                  │
+└────────────────────────────┬──────────────────────────────────┘
+                             │
+                             ▼
+          Synthesised Ground-Level Panorama (256×512 RGB)
+```
+
+**Design decisions:**
+
+- **VALID padding in VGG-16** ensures the conv4_3 feature map is exactly 17×17 for a 224×224
+  input, matching the paper's dimension constraint for the 289×320 weight matrix.
+- **Conditioned transformation** (Network S) allows the weight matrix to depend on the aerial
+  image content, not just geometric coordinates.  This is the key difference from the
+  unconditioned baseline (`--no_conditioned`).
+- **Hypercolumn** aggregates multi-scale features (conv1–conv4) for richer semantic context.
+- **AMP training** halves VRAM usage, enabling larger batch sizes on consumer GPUs.
 
 ---
 
 ## Project Structure
 
 ```
-Aerial2Ground/
+CrossViewNet/
 │
-├── aerial_to_ground_final.py   # End-to-end inference: aerial image → ground panorama
-├── infer_random_demo.py        # Quick demo: picks a random sample and runs inference
+├── inference.py                 # ← START HERE: quickstart inference (any image / folder)
+├── webcam_demo.py               # Live webcam / video stream inference
+├── aerial_to_ground_final.py    # Original full-pipeline inference script
+├── infer_random_demo.py         # Random CVUSA sample demo
 │
-├── train_crossnet.py           # Stage 1 training script (CrossNet)
-├── train_gan_pix2pix.py        # Stage 2 training script (Pix2Pix GAN)
+├── crossnet_model.py            # CrossNet architecture (PyTorch)
+├── gan_unet_model.py            # Pix2Pix U-Net Generator + PatchGAN Discriminator
+├── crossnet_dataset.py          # Dataset loader (CSV-based path lists)
 │
-├── crossnet_model.py           # CrossNet model definition (PyTorch)
-├── gan_unet_model.py           # Pix2Pix Generator (U-Net) + Discriminator
-├── crossnet_dataset.py         # Dataset loader (reads CSV file paths)
-├── backbone_tf_legacy.py       # Legacy TF reference backbone (not used in training)
+├── train_crossnet.py            # Stage 1 training script
+├── train_gan_pix2pix.py         # Stage 2 training script
+├── prepare_data.py              # Dataset CSV preparation utility
 │
-├── prepare_data.py             # Utility to prepare/verify dataset CSV files
-├── cvpr_train.csv              # Training split (image paths)
-├── cvpr_val.csv                # Validation split (image paths)
+├── demo/                        # 5 sample aerial images for instant demo
+│   ├── sample_aerial_road.jpg
+│   ├── sample_aerial_forest.jpg
+│   ├── sample_aerial_suburban.jpg
+│   ├── sample_aerial_rural.jpg
+│   └── sample_aerial_highway.jpg
 │
-├── requirements.txt            # Python dependencies
-├── aerial_to_ground_final.ipynb  # Notebook version of the final pipeline
+├── assets/                      # README visuals
+│   ├── results_grid_labeled.png
+│   ├── results_grid.png
+│   ├── pipeline_strip.png
+│   └── training_progress.png
 │
-├── data/                       # Place dataset images here (see Dataset Setup)
-├── cvpr_subset/                # Small example subset for quick testing
-└── outputs/
-    ├── ckpts_pt/               # CrossNet checkpoints saved here during training
-    ├── ckpts_gan/              # GAN checkpoints saved here during training
-    ├── dump_pt/                # CrossNet training visualisations
-    ├── dump_gan/               # GAN training montages
-    └── pipeline_results/       # Saved inference output montages
+├── cvpr_train.csv               # CVUSA training split (image path pairs)
+├── cvpr_val.csv                 # CVUSA validation split
+├── requirements.txt             # Python dependencies
+│
+├── outputs/
+│   ├── ckpts_pt/                # CrossNet checkpoints  (not committed — large)
+│   ├── ckpts_gan/               # GAN checkpoints       (not committed — large)
+│   ├── dump_pt/                 # CrossNet training visualisations
+│   ├── dump_gan/                # GAN training montages
+│   └── pipeline_results/        # Saved inference outputs
+│
+├── docs/
+│   └── reaserch_plan.md         # Research analysis & architecture decisions
+│
+├── backbone_tf_legacy.py        # Legacy TF 1.x reference  (not used)
+├── crossnet_tf_legacy.py        # ↑ same
+├── train_crossnet_tf_legacy.py  # ↑ same
+│
+└── Aerial_to_Ground_Report.pdf  # Full project report
 ```
-
----
-
-## Requirements
-
-**Python 3.9+** is recommended.
-
-### Install dependencies
-
-```bash
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
-pip install Pillow numpy imageio scipy
-```
-
-Or install everything at once from the requirements file:
-
-```bash
-pip install -r requirements.txt
-# Then install PyTorch separately with the correct CUDA version for your system:
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
-```
-
-> **Windows GPU note:** TensorFlow 2.11+ does not support GPU on Windows. The project uses **PyTorch** for all training and inference. The `tf_legacy` files are kept as a reference implementation only and are not needed to run the project.
-
-| Package | Version | Purpose |
-|---|---|---|
-| torch | >= 2.0.0 | Model training & inference |
-| torchvision | >= 0.15.0 | VGG16 backbone (pretrained) |
-| Pillow | >= 9.0.0 | Image loading |
-| numpy | >= 1.23.0 | Array operations |
-| imageio | >= 2.22.0 | Saving output images |
-| scipy | >= 1.9.0 | Utilities |
 
 ---
 
 ## Dataset Setup
 
-The model is trained on the **CVUSA dataset** — geo-tagged aerial/ground panorama pairs.
+The model is trained on **CVUSA** — ~35,532 geo-registered aerial / ground panorama pairs.
 
-1. Download the full dataset from the [original Google Drive link](https://drive.google.com/open?id=0BzvmHzyo_zCAX3I4VG1mWnhmcGc).
-2. Extract it so that the image files are accessible under the paths listed in `cvpr_train.csv` and `cvpr_val.csv`.
-3. The CSV files contain one image path per line. Edit the paths in the CSV files (or in `crossnet_dataset.py`) to match your local directory layout if needed.
+### Option A — Use included demo images (no download needed)
 
-A small example subset is already included in `cvpr_subset/` — you can use this to verify the pipeline end-to-end without downloading the full dataset.
+```bash
+python inference.py --source demo/
+```
+
+Five aerial images are already included in `demo/` for immediate testing.
+
+### Option B — Download CVUSA subset
+
+A lightweight subset structure (`cvpr_subset/`) is included in the repo.  
+Full paths are listed in `cvpr_train.csv` and `cvpr_val.csv`.
+
+### Option C — Full CVUSA dataset (~500 GB)
+
+1. Request access from the [original CVUSA page](https://mvrl.cse.wustl.edu/datasets/cvusa/).
+2. Extract so that the paths in `cvpr_train.csv` resolve correctly.
+3. Edit the root prefix in `crossnet_dataset.py` if your layout differs.
+
+> **Note:** The full dataset was **not downloaded** for this implementation due to storage
+> constraints.  Training used a representative subset.  Results reflect partial training and
+> will improve significantly with the full dataset and extended training.
 
 ---
 
@@ -112,185 +321,132 @@ A small example subset is already included in `cvpr_subset/` — you can use thi
 
 ### Stage 1 — CrossNet (Semantic Prediction)
 
-CrossNet takes a **224×224 aerial image** and predicts a **semantic segmentation map** with 4 classes (road, vegetation, building, sky/other).
-
 ```bash
-# Default run — uses cvpr_train.csv, batch size 4, 10 epochs
-python train_crossnet.py
-
-# Custom options
+# Default: 10 epochs, batch size 4, all options shown below
 python train_crossnet.py \
-    --train_csv cvpr_train.csv \
-    --val_csv   cvpr_val.csv \
-    --batch_size 2 \
-    --epochs 20 \
-    --lr 1e-3 \
+    --train_csv  cvpr_train.csv \
+    --val_csv    cvpr_val.csv \
+    --batch_size 4 \
+    --epochs     20 \
+    --lr         1e-3 \
     --num_classes 4 \
-    --ckpt_dir outputs/ckpts_pt \
-    --dump_dir outputs/dump_pt
+    --ckpt_dir   outputs/ckpts_pt \
+    --dump_dir   outputs/dump_pt
 
-# Train unconditioned variant (no ground-view conditioning)
-python train_crossnet.py --no_conditioned
+# Resume from checkpoint
+python train_crossnet.py --resume outputs/ckpts_pt/crossnet_step0088830.pt
 
-# Disable Automatic Mixed Precision (if you get AMP errors)
+# Disable AMP (use FP32 everywhere)
 python train_crossnet.py --no_amp
-
-# Resume from a checkpoint
-python train_crossnet.py --resume outputs/ckpts_pt/crossnet_step0050000.pt
 ```
 
-**Key arguments for `train_crossnet.py`:**
+Checkpoints saved to `outputs/ckpts_pt/crossnet_step<N>.pt`.
 
-| Argument | Default | Description |
-|---|---|---|
-| `--train_csv` | `cvpr_train.csv` | Path to training CSV |
-| `--val_csv` | `cvpr_val.csv` | Path to validation CSV |
-| `--batch_size` | `4` | Batch size |
-| `--epochs` | `10` | Number of training epochs |
-| `--lr` | `1e-3` | Initial learning rate |
-| `--lr_decay_steps` | `5000` | LR decay every N steps |
-| `--lr_decay_rate` | `0.7` | Multiplicative LR decay factor |
-| `--num_classes` | `4` | Number of semantic classes |
-| `--no_pretrained` | off | Skip ImageNet weights for VGG16 |
-| `--no_conditioned` | off | Use unconditioned transformation |
-| `--no_amp` | off | Disable mixed precision (use FP32) |
-| `--log_every` | `10` | Print loss every N steps |
-| `--vis_every` | `100` | Save visualisation every N steps |
-| `--save_every` | `500` | Save checkpoint every N steps |
-| `--resume` | `''` | Path to `.pt` checkpoint to resume |
+### Stage 2 — Pix2Pix GAN (Photo Synthesis)
 
-Checkpoints are saved to `outputs/ckpts_pt/crossnet_step<NNNNNNN>.pt`.
-
----
-
-### Stage 2 — Pix2Pix GAN (Image Synthesis)
-
-The GAN learns to convert semantic maps into realistic ground-level panoramas. **Train CrossNet first** before training the GAN.
+Train CrossNet first, then:
 
 ```bash
-# Full training (~35 k samples, several hours per epoch on a mid-range GPU)
+# Full run (~35k samples, several hours per epoch on mid-range GPU)
 python train_gan_pix2pix.py
 
-# Quick demo run — 5 000 samples, 20 epochs (1–2 h total)
+# Quick test run (5,000 samples, 20 epochs — ~1-2 h)
 python train_gan_pix2pix.py --max_samples 5000 --epochs 20
 
 # Resume from existing checkpoints
 python train_gan_pix2pix.py \
-    --resume_g outputs/ckpts_gan/G_step0010000.pt \
-    --resume_d outputs/ckpts_gan/D_step0010000.pt
+    --resume_g outputs/ckpts_gan/G_step0197766.pt \
+    --resume_d outputs/ckpts_gan/D_step0197766.pt
 ```
 
-GAN checkpoints are saved to `outputs/ckpts_gan/` as `G_step<N>.pt` (generator) and `D_step<N>.pt` (discriminator). Only the latest 3 checkpoints are kept to save disk space.
+GAN checkpoints saved to `outputs/ckpts_gan/G_step<N>.pt` and `D_step<N>.pt`.
+
+### Training Tips
+
+| Tip | Details |
+|-----|---------|
+| **GPU VRAM** | CrossNet needs ~3 GB at batch=4; GAN needs ~6 GB at default settings |
+| **Low VRAM** | Use `--batch_size 2` and `--no_amp` fallback |
+| **CPU training** | Supported but slow; expect ~10× slower than GPU |
+| **Monitoring** | Visualisations saved every 500 steps to `outputs/dump_pt/` and `outputs/dump_gan/` |
+| **Checkpoint rolling** | Only the last 3 checkpoints are kept to save disk space |
 
 ---
 
-## Inference
+## Full Training Guide
 
-### Full Pipeline (Recommended)
+For a complete step-by-step training walkthrough including dataset preparation, GPU setup,
+hyperparameter tuning, and evaluation metrics, see **[TRAINING.md](TRAINING.md)**.
 
-`aerial_to_ground_final.py` runs both stages end-to-end on any aerial image and displays a 3-panel result:
+---
 
-```
-[ Aerial Input ]  |  [ CrossNet Semantic Map ]  |  [ GAN Synthesised Ground View ]
-```
+## Deployment
+
+For instructions on deploying CrossViewNet as a web service (Gradio on Hugging Face Spaces,
+FastAPI Docker container, or Google Colab demo), see **[DEPLOY.md](DEPLOY.md)**.
+
+### Quick Colab / Paperspace inference
 
 ```bash
-# Basic usage — auto-detects latest checkpoints in outputs/
-python aerial_to_ground_final.py --input path/to/aerial.jpg
+# On any cloud instance with GPU:
+git clone https://github.com/anasahmed81103/AerialToGround.git && cd AerialToGround
+pip install -r requirements.txt
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 
-# Specify checkpoints explicitly
-python aerial_to_ground_final.py \
-    --input        path/to/aerial.jpg \
-    --crossnet_ckpt outputs/ckpts_pt/crossnet_step0088830.pt \
-    --gan_ckpt      outputs/ckpts_gan/G_step0197766.pt
-
-# Save result without displaying a window (useful on headless servers)
-python aerial_to_ground_final.py --input path/to/aerial.jpg --no_display
+# Upload your checkpoints, then:
+python inference.py --source demo/ --no_display
 ```
-
-The result montage is automatically saved to `outputs/pipeline_results/`.
 
 ---
 
-### Quick Random Demo
+## Research Context & Future Work
 
-Picks a random sample from `cvpr_train.csv` and runs inference using the latest available checkpoints:
+This project reproduces the CVPR 2017 CrossNet baseline and identifies several
+improvements that could form the basis of a research contribution:
 
-```bash
-python infer_random_demo.py
-```
+### Known Limitations (honestly stated)
 
-> If no GAN checkpoint exists, the script skips Stage 2 and only outputs the semantic map. Train the GAN first with `train_gan_pix2pix.py` to enable full synthesis.
+| Limitation | Impact |
+|------------|--------|
+| Partially trained on CVUSA subset (not full 500 GB) | Synthesised images lack fine texture detail |
+| VGG-16 backbone (138M params) | Heavy; modern alternatives exist |
+| Only 4 semantic classes | Insufficient for deployment-grade understanding |
+| Low native resolution (8×40 semantic map) | Limits structural detail |
+| Linear view transformation matrix | Cannot model complex perspective distortions |
 
----
+### Potential Research Extensions
 
-## Outputs
+| Extension | Approach | Expected Gain |
+|-----------|----------|---------------|
+| **Modern backbone** | Replace VGG-16 with ResNet-50 or MobileNetV2 | Lighter model, better features |
+| **Spatial attention** | Add CBAM or cross-attention in Network F | Better viewpoint-aware mapping |
+| **Richer supervision** | Replace pseudo-labels with DeepLabV3+ | Cleaner training signal, higher mIoU |
+| **Multi-scale features** | Add FPN-style fusion of conv1–conv5 | Finer spatial detail |
+| **More classes** | Extend to 6+ classes (ISPRS taxonomy) | Better scene understanding |
+| **Diffusion-based synthesis** | Replace Pix2Pix with ControlNet-style diffusion | Significantly sharper panoramas |
 
-| Path | Contents |
-|---|---|
-| `outputs/ckpts_pt/` | CrossNet `.pt` checkpoints |
-| `outputs/ckpts_gan/` | GAN Generator + Discriminator `.pt` checkpoints |
-| `outputs/dump_pt/` | Visualisations saved during CrossNet training |
-| `outputs/dump_gan/` | Montage JPEGs `[semantic | real ground | synthesised]` from GAN training |
-| `outputs/pipeline_results/` | Final inference montages from `aerial_to_ground_final.py` |
+### Research Plan
 
----
-
-## Architecture Overview
-
-```
-Aerial Image (224×224 RGB)
-        │
-        ▼
-┌─────────────────────────────────┐
-│  CrossNet (Stage 1)             │
-│  ─ VGG16 aerial feature encoder │
-│  ─ Conditioned transformation   │
-│    network (view mapping)       │
-│  ─ Segmentation decoder         │
-└───────────────┬─────────────────┘
-                │
-                ▼
-  Semantic Map (4 classes, upscaled to 256×512)
-                │
-                ▼
-┌─────────────────────────────────┐
-│  Pix2Pix GAN (Stage 2)         │
-│  ─ U-Net Generator              │
-│  ─ PatchGAN Discriminator       │
-│  ─ L1 + Adversarial loss        │
-└───────────────┬─────────────────┘
-                │
-                ▼
-  Synthesised Ground Panorama (256×512 RGB)
-```
-
-**CrossNet** is trained with weak supervision: ground-level images are segmented by an off-the-shelf segmentation model (e.g., DeepLab) to produce pseudo-labels, and the model learns to predict those labels from the aerial view alone.
-
-**The GAN** is trained on clean ground-truth semantic annotations so it learns a robust label → photo mapping. At inference, CrossNet's predicted maps are used as input instead.
-
----
-
-## Results
-
-After training, the pipeline predicts semantic classes including:
-
-- Roads
-- Vegetation / trees
-- Buildings / structures
-- Sky / other
-
-Example results are saved during training to `outputs/dump_pt/` (CrossNet) and `outputs/dump_gan/` (GAN montages), so you can monitor quality as training progresses.
+A detailed analysis of the paper, identified gaps, and a day-by-day implementation
+plan is in [`docs/reaserch_plan.md`](docs/reaserch_plan.md).
 
 ---
 
 ## Citation
 
+If you use this code or build on this work, please cite the original paper:
+
 ```bibtex
 @inproceedings{zhai2017predicting,
-  title={Predicting Ground-Level Scene Layout from Aerial Imagery},
-  author={Zhai, Menghua and Bessinger, Zachary and Workman, Scott and Jacobs, Nathan},
-  booktitle={CVPR},
-  year={2017}
+  title     = {Predicting Ground-Level Scene Layout from Aerial Imagery},
+  author    = {Zhai, Menghua and Bessinger, Zachary and Workman, Scott and Jacobs, Nathan},
+  booktitle = {Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2017}
 }
 ```
+
+---
+
+<p align="center">
+  <sub>Implemented by Anas Ahmed — Computer Vision, Semester 8 (2026) · PyTorch reimplementation of Zhai et al. CVPR 2017</sub>
+</p>

@@ -314,7 +314,7 @@ def main():
     # ── Device ───────────────────────────────────────────────────────────────
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'\n{"="*60}')
-    print('  Aerial → Ground Synthesis Pipeline')
+    print('  Aerial -> Ground Synthesis Pipeline')
     print(f'{"="*60}')
     print(f'  Input image   : {args.input}')
     print(f'  CrossNet ckpt : {crossnet_ckpt}')

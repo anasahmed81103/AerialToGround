@@ -1,13 +1,76 @@
-# datasets
-data/
-cvpr_subset/
+# ===========================================================================
+# CrossViewNet .gitignore
+# ===========================================================================
 
-# outputs
-outputs/
-
-# python cache
+# ── Python cache ────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
+*$py.class
+*.pyo
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
 
-# misc
-*.pdf
+# ── Virtual environments ─────────────────────────────────────────────────────
+venv/
+env/
+.venv/
+.env/
+ENV/
+
+# ── Jupyter checkpoints ──────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ── PyTorch model checkpoints (large — download / train separately) ─────────
+outputs/ckpts_pt/
+outputs/ckpts_gan/
+
+# ── Training dump images (intermediate visualisations, not needed for repo) ──
+outputs/dump_pt/
+outputs/dump_gan/
+outputs/logs/
+outputs/infer_demo/
+outputs/webcam_captures/
+
+# ── Pipeline results (regenerate with inference.py) ──────────────────────────
+# Comment this out if you want to commit specific result images:
+# outputs/pipeline_results/
+
+# ── Full CVUSA dataset (too large — 500 GB raw imagery) ─────────────────────
+data/
+
+# ── cvpr_subset data (large subset — ~41k bingmap images) ───────────────────
+cvpr_subset/bingmap/
+cvpr_subset/streetview/
+
+# ── OS-specific ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+
+# ── IDE settings ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ── Archives & binaries ───────────────────────────────────────────────────────
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ===========================================================================
+# Tracked (do NOT ignore these):
+# ──────────────────────────────
+#   demo/                  — sample aerial images for quickstart
+#   assets/                — README visual assets (comparison strips, etc.)
+#   outputs/pipeline_results/  — can be selectively committed
+#   cvpr_subset/splits/    — lightweight CSV splits (not imagery)
+#   cvpr_train.csv
+#   cvpr_val.csv
+# ===========================================================================
