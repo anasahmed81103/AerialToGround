@@ -1,0 +1,20 @@
+{
+  "name": "polar_full",
+  "params_trainable": 1533702,
+  "peak_vram_gb": 1.9795308113098145,
+  "sec_per_epoch": 1683.8690074384212,
+  "train_minutes": 234.05977127154668,
+  "best_minival_miou": 0.5125325322151184,
+  "test_full_res": {
+    "n": 8884,
+    "best_epoch": 7,
+    "miou": 0.5135307312011719,
+    "acc": 0.7454085350036621,
+    "iou": {
+      "sky": 0.689213216304779,
+      "vegetation": 0.6611539125442505,
+      "road": 0.4944496154785156,
+      "building": 0.2093062549829483
+    }
+  }
+}

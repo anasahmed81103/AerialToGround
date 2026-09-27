@@ -40,12 +40,19 @@ import torchvision.transforms.functional as TF
 # -- local modules --------------------------------------------------------
 from crossnet_model import CrossNet
 from gan_unet_model import UNetGenerator
-from semantic_metrics import CLASS_COLORS
 
 # -------------------------------------------------------------------------
 ROOT        = os.path.dirname(os.path.abspath(__file__))
 NUM_CLASSES = 4
 GAN_H, GAN_W = 256, 512
+
+# Semantic class colour palette  (red=sky, green=vegetation, blue=road, yellow=building)
+CLASS_COLORS = np.array([
+    [255,  64,  64],   # 0  sky / other
+    [ 64, 200,  64],   # 1  vegetation
+    [ 64,  64, 255],   # 2  road
+    [255, 220,  30],   # 3  building / structure
+], dtype=np.uint8)
 
 
 # -------------------------------------------------------------------------

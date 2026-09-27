@@ -1,0 +1,13 @@
+{
+  "ckpt": "E:\\anas\\uni\\semester 8\\computer vision\\project\\Aerial2Ground\\experiments\\baseline\\checkpoints\\crossnet_step0088830.pt",
+  "n": 8884,
+  "miou_full": 0.29933083057403564,
+  "miou_native": 0.2772333323955536,
+  "acc_full": 0.43401437997817993,
+  "iou_full": {
+    "sky": 0.638357400894165,
+    "vegetation": 0.026248618960380554,
+    "road": 0.43783634901046753,
+    "building": 0.09488098323345184
+  }
+}

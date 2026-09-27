@@ -1,0 +1,2 @@
+epoch,step,n,miou_full,miou_native,acc_full,iou_sky,iou_vegetation,iou_road,iou_building
+10,88830,1024,0.299243,0.277697,0.434993,0.639266,0.029811,0.432025,0.095869
