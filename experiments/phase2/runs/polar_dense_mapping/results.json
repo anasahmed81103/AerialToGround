@@ -1,0 +1,20 @@
+{
+  "name": "polar_dense_mapping",
+  "params_trainable": 4480516,
+  "peak_vram_gb": 1.980349063873291,
+  "sec_per_epoch": 1745.1753253936768,
+  "train_minutes": 241.97953491608303,
+  "best_minival_miou": 0.5152838230133057,
+  "test_full_res": {
+    "n": 8884,
+    "best_epoch": 7,
+    "miou": 0.5137656927108765,
+    "acc": 0.7455563545227051,
+    "iou": {
+      "sky": 0.6883255243301392,
+      "vegetation": 0.6604673266410828,
+      "road": 0.49910828471183777,
+      "building": 0.20716167986392975
+    }
+  }
+}

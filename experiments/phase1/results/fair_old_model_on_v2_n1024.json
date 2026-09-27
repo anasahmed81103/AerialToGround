@@ -1,0 +1,13 @@
+{
+  "ckpt": "E:\\anas\\uni\\semester 8\\computer vision\\project\\Aerial2Ground\\outputs\\ckpts_pt\\crossnet_step0088830.pt",
+  "n": 1024,
+  "miou_full": 0.29924291372299194,
+  "miou_native": 0.2776973247528076,
+  "acc_full": 0.43499258160591125,
+  "iou_full": {
+    "sky": 0.6392661333084106,
+    "vegetation": 0.02981128729879856,
+    "road": 0.43202492594718933,
+    "building": 0.09586931765079498
+  }
+}

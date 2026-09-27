@@ -1,0 +1,51 @@
+{
+  "n": 400,
+  "pano_grid": [
+    56,
+    308
+  ],
+  "horizon_frac": 0.5,
+  "clockwise": {
+    "best_shift_col": 155,
+    "north_at_frac": 0.5032467532467533,
+    "road_iou_best": 0.23024548590183258,
+    "road_iou_mean_over_shifts": 0.20149637758731842
+  },
+  "counterclockwise": {
+    "best_shift_col": 158,
+    "north_at_frac": 0.512987012987013,
+    "road_iou_best": 0.21015596389770508,
+    "road_iou_mean_over_shifts": 0.20131585001945496
+  },
+  "per_class_at_best": {
+    "sky": {
+      "iou_at_best_shift": 0.03558945655822754,
+      "mean_over_shifts": 0.032924339175224304
+    },
+    "vegetation": {
+      "iou_at_best_shift": 0.46584805846214294,
+      "mean_over_shifts": 0.421639621257782
+    },
+    "road": {
+      "iou_at_best_shift": 0.23024548590183258,
+      "mean_over_shifts": 0.20149637758731842
+    },
+    "building": {
+      "iou_at_best_shift": 0.13896328210830688,
+      "mean_over_shifts": 0.129509836435318
+    }
+  },
+  "flip_test": {
+    "best_shift_after_flip": 153,
+    "road_iou_after_flip": 0.23024548590183258,
+    "road_iou_after_flip_at_original_shift": 0.23019689321517944,
+    "consistent": true
+  },
+  "best": {
+    "clockwise": true,
+    "best_shift_col": 155,
+    "north_at_frac": 0.5032467532467533,
+    "road_iou_best": 0.23024548590183258,
+    "road_iou_mean_over_shifts": 0.20149637758731842
+  }
+}

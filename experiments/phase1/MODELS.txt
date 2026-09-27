@@ -1,0 +1,14 @@
+Stage 1 (CrossNet, Phase 1)
+  experiments/phase1/checkpoints/crossnet_best.pt           <-- best val mIoU
+  experiments/phase1/checkpoints/crossnet_step0177000.pt
+  experiments/phase1/checkpoints/crossnet_step0177500.pt
+  experiments/phase1/checkpoints/crossnet_step0177660.pt   <-- end of epoch 20
+
+Also reachable as:
+  outputs/ckpts_pt_v2/   (junction)
+
+Labels
+  cvpr_train_v2.csv
+  cvpr_val_v2.csv
+  cvpr_subset/labels_v2/ground/
+  cvpr_subset/labels_v2/aerial/

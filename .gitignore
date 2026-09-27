@@ -24,27 +24,16 @@ ENV/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# ── PyTorch model checkpoints (large — download / train separately) ─────────
-outputs/ckpts_pt/
-outputs/ckpts_gan/
-
-# ── Training dump images (intermediate visualisations, not needed for repo) ──
-outputs/dump_pt/
-outputs/dump_gan/
-outputs/logs/
-outputs/infer_demo/
-outputs/webcam_captures/
-
-# ── Pipeline results (regenerate with inference.py) ──────────────────────────
-# Comment this out if you want to commit specific result images:
-# outputs/pipeline_results/
-
-# ── Full CVUSA dataset (too large — 500 GB raw imagery) ─────────────────────
+# ── Local data and run artifacts (never commit) ─────────────────────────────
+outputs/
+cvpr_subset/
 data/
+cache/
 
-# ── cvpr_subset data (large subset — ~41k bingmap images) ───────────────────
-cvpr_subset/bingmap/
-cvpr_subset/streetview/
+# Frozen experiment weights / full dump trees (results + code snapshots stay tracked)
+experiments/**/checkpoints/
+experiments/**/dumps/
+experiments/**/gan_checkpoints/
 
 # ── OS-specific ──────────────────────────────────────────────────────────────
 .DS_Store
@@ -69,8 +58,6 @@ desktop.ini
 # ──────────────────────────────
 #   demo/                  — sample aerial images for quickstart
 #   assets/                — README visual assets (comparison strips, etc.)
-#   outputs/pipeline_results/  — can be selectively committed
-#   cvpr_subset/splits/    — lightweight CSV splits (not imagery)
-#   cvpr_train.csv
-#   cvpr_val.csv
+#   experiments/           — code snapshots + number tables (not weights/dumps)
+#   cvpr_train.csv / cvpr_val.csv / cvpr_*_v2.csv — path lists only
 # ===========================================================================

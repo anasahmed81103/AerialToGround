@@ -1,0 +1,20 @@
+{
+  "name": "polar_no_offsets",
+  "params_trainable": 1531396,
+  "peak_vram_gb": 1.935793399810791,
+  "sec_per_epoch": 1595.1739753484726,
+  "train_minutes": 221.91845072905224,
+  "best_minival_miou": 0.5138593912124634,
+  "test_full_res": {
+    "n": 8884,
+    "best_epoch": 8,
+    "miou": 0.5142019987106323,
+    "acc": 0.7467765808105469,
+    "iou": {
+      "sky": 0.6905272006988525,
+      "vegetation": 0.6627782583236694,
+      "road": 0.4970631003379822,
+      "building": 0.2064395695924759
+    }
+  }
+}

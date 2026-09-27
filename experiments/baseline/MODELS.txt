@@ -1,0 +1,15 @@
+Stage 1 (CrossNet)
+  experiments/baseline/checkpoints/crossnet_step0088000.pt
+  experiments/baseline/checkpoints/crossnet_step0088500.pt
+  experiments/baseline/checkpoints/crossnet_step0088830.pt   <-- reported baseline
+
+Also reachable as:
+  outputs/ckpts_pt/   (junction)
+
+Stage 2 (Pix2Pix)
+  experiments/baseline/gan_checkpoints/G_step0197766.pt
+  experiments/baseline/gan_checkpoints/D_step0197766.pt
+  (plus 194000 and 196000)
+
+Also reachable as:
+  outputs/ckpts_gan/   (junction)
