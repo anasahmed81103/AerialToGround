@@ -8,11 +8,11 @@
   "minival": 2000,
   "seed": 0,
   "epochs": 8,
-  "batch_size": 16,
+  "batch_size": 12,
   "lr": 0.0003,
   "weight_decay": 0.01,
   "warmup": 500,
-  "num_workers": 4,
+  "num_workers": 2,
   "amp": false,
   "no_flip": false,
   "focal_gamma": 2.0,
@@ -27,5 +27,6 @@
   "no_offsets": false,
   "mapping": "polar",
   "skip_test": false,
-  "save_n": 8
+  "save_n": 4,
+  "resume": "experiments\\phase2\\runs\\polar_full_64x320"
 }

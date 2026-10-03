@@ -65,6 +65,8 @@ def get_args():
 
     p.add_argument('--skip_test', action='store_true')
     p.add_argument('--save_n', type=int, default=8)
+    p.add_argument('--resume', default='',
+                   help='Path to last.pt (or run dir) to continue training')
     return p.parse_args()
 
 
@@ -78,6 +80,11 @@ def label_cache(rows, hw, path):
         arr = np.load(path, mmap_mode='r')
         if arr.shape == (len(rows), *hw):
             return path
+        if arr.shape[1:] == hw and arr.shape[0] > len(rows):
+            raise SystemExit(
+                f'{path} already has {arr.shape[0]} labels but this run only needs {len(rows)}. '
+                'Refusing to overwrite a full cache — drop --max_samples or use a separate path.'
+            )
     print(f'[*] Building label cache {path} ...', flush=True)
     arr = np.zeros((len(rows), *hw), dtype=np.uint8)
     for i, r in enumerate(rows):
@@ -176,6 +183,8 @@ def main():
     np.random.seed(args.seed)
     random.seed(args.seed)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    if device.type == 'cuda':
+        torch.backends.cudnn.benchmark = True
 
     run_dir = os.path.join(args.runs_dir, args.name)
     os.makedirs(run_dir, exist_ok=True)
@@ -193,10 +202,17 @@ def main():
     train_labels = label_cache(train_rows, hw, os.path.join(
         args.cache, f'labels_{hw[0]}x{hw[1]}_train.npy'))
 
-    perm = np.random.RandomState(args.seed).permutation(len(train_rows))
-    n_mv = min(args.minival, len(train_rows) // 4)
-    mv_idx, tr_idx = perm[:n_mv], perm[n_mv:]
-    np.save(os.path.join(run_dir, 'minival_indices.npy'), mv_idx)
+    mv_path = os.path.join(run_dir, 'minival_indices.npy')
+    if os.path.isfile(mv_path):
+        mv_idx = np.load(mv_path)
+        tr_mask = np.ones(len(train_rows), dtype=bool)
+        tr_mask[mv_idx] = False
+        tr_idx = np.nonzero(tr_mask)[0]
+    else:
+        perm = np.random.RandomState(args.seed).permutation(len(train_rows))
+        n_mv = min(args.minival, len(train_rows) // 4)
+        mv_idx, tr_idx = perm[:n_mv], perm[n_mv:]
+        np.save(mv_path, mv_idx)
 
     train_dl = DataLoader(
         FeatDataset(train_feats, tr_idx, label_path=train_labels, flip=not args.no_flip),
@@ -224,6 +240,8 @@ def main():
           f'train {len(tr_idx)}  minival {len(mv_idx)}  test {len(test_rows)}', flush=True)
 
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    for pg in opt.param_groups:
+        pg.setdefault('initial_lr', args.lr)
     total = args.epochs * len(train_dl)
 
     def lr_at(step):
@@ -232,16 +250,38 @@ def main():
         t = (step - args.warmup) / max(1, total - args.warmup)
         return 0.5 * (1 + math.cos(math.pi * t))
 
-    sched = torch.optim.lr_scheduler.LambdaLR(opt, lr_at)
+    start_epoch = 1
+    step = 0
+    best_miou = -1.0
+    resume_path = args.resume.strip()
+    if resume_path:
+        if os.path.isdir(resume_path):
+            resume_path = os.path.join(resume_path, 'last.pt')
+        if not os.path.isfile(resume_path):
+            raise SystemExit(f'--resume not found: {resume_path}')
+        ck0 = torch.load(resume_path, map_location=device, weights_only=False)
+        model.load_state_dict(ck0['model'])
+        start_epoch = int(ck0['epoch']) + 1
+        step = int(ck0.get('step', 0))
+        best_path = os.path.join(os.path.dirname(resume_path), 'best.pt')
+        if os.path.isfile(best_path):
+            best_miou = float(torch.load(best_path, map_location='cpu',
+                                         weights_only=False).get('minival_miou', -1))
+        print(f'[*] Resumed from {resume_path}  epoch {start_epoch}/{args.epochs}  '
+              f'step {step}  best minival {best_miou:.4f}', flush=True)
+        if start_epoch > args.epochs:
+            print('[*] Already finished all epochs; running test only.', flush=True)
+
+    sched = torch.optim.lr_scheduler.LambdaLR(opt, lr_at, last_epoch=max(-1, step - 1))
     scaler = torch.amp.GradScaler('cuda', enabled=args.amp and device.type == 'cuda')
     if device.type == 'cuda':
         torch.cuda.reset_peak_memory_stats()
 
     curve_path = os.path.join(run_dir, 'minival_curve.csv')
-    best_miou, step, t_start = -1.0, 0, time.time()
+    t_start = time.time()
     epoch_times = []
 
-    for epoch in range(1, args.epochs + 1):
+    for epoch in range(start_epoch, args.epochs + 1):
         t0 = time.time()
         running = 0.0
         for bi, (f, y) in enumerate(train_dl, start=1):
@@ -293,7 +333,7 @@ def main():
         'params_trainable': n_params,
         'peak_vram_gb': (torch.cuda.max_memory_allocated() / 1024 ** 3
                          if device.type == 'cuda' else 0.0),
-        'sec_per_epoch': float(np.mean(epoch_times)),
+        'sec_per_epoch': float(np.mean(epoch_times)) if epoch_times else 0.0,
         'train_minutes': (time.time() - t_start) / 60,
         'best_minival_miou': best_miou,
     }
