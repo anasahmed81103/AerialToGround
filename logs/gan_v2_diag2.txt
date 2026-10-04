@@ -1,0 +1,93 @@
+
+======================================================================
+  Pix2Pix GAN — semantic labels → ground-view RGB  (configuration)
+======================================================================
+  train_csv              cvpr_train_v2.csv
+  val_csv                cvpr_val_v2.csv
+  max_samples            None
+  batch_size             16
+  epochs                 1
+  lr                     0.0002
+  lambda_l1              100.0
+  ngf                    64
+  ndf                    64
+  num_classes            4
+  img_h                  256
+  img_w                  512
+  num_workers            4
+  ckpt_dir               experiments/phase2/runs/gan_v2_diag2/ckpts
+  dump_dir               experiments/phase2/runs/gan_v2_diag2/dump
+  log_every              100
+  vis_every              500
+  save_every             2000
+  resume_g               outputs/ckpts_gan/G_step0197766.pt
+  resume_d               outputs/ckpts_gan/D_step0197766.pt
+  fresh_d_optimizer      True
+  random_init_d          False
+  g_steps                1
+  label_smooth           0.9
+  no_amp                 True
+======================================================================
+
+[*] GPU  : NVIDIA GeForce RTX 4090  (23.5 GB VRAM)
+[*] AMP  : OFF
+[*] Generator params    : 54.42 M
+[*] Discriminator params: 2.77 M
+[*] Resumed G from step 197766, epoch 38
+[*] Resumed D weights only (fresh Adam + GradScaler for D)
+[*] Training samples : 35532
+[*] Batch size       : 16  (VRAM ≈ 18.6 GB est.)
+[*] G updates / D    : 1  (D label_smooth=0.9)
+[*] Steps per epoch  : 2220
+[*] Total steps      : 2220
+[*] Est. total time  : 0.4 h  (rough estimate; use --max_samples N to shorten)
+[*] Healthy training : D_loss in [0.05–0.50], G_adv in [0.5–1.5]
+
+  [D_diag run_step    1 global 0197767] grad_L2=1.932441e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.899/0.863/0.995 fake(mean/min/max)=0.000/-0.145/0.066
+  [D_diag run_step    2 global 0197768] grad_L2=1.646692e-01 (params_with_grad=13) amp=False real(mean/min/max)=0.905/0.849/1.030 fake(mean/min/max)=0.003/-0.233/0.095
+  [D_diag run_step    3 global 0197769] grad_L2=4.761792e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.901/0.854/0.962 fake(mean/min/max)=0.004/-0.105/0.300
+  [D_diag run_step    4 global 0197770] grad_L2=7.699174e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.895/0.828/0.964 fake(mean/min/max)=-0.006/-0.061/0.097
+  [D_diag run_step    5 global 0197771] grad_L2=3.573984e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.899/0.841/0.983 fake(mean/min/max)=-0.001/-0.057/0.077
+  [D_diag run_step    6 global 0197772] grad_L2=2.433549e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.903/0.854/0.956 fake(mean/min/max)=0.002/-0.195/0.064
+  [D_diag run_step    7 global 0197773] grad_L2=2.705423e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.900/0.826/0.937 fake(mean/min/max)=0.001/-0.075/0.028
+  [D_diag run_step    8 global 0197774] grad_L2=5.907509e-03 (params_with_grad=13) amp=False real(mean/min/max)=0.899/0.816/0.995 fake(mean/min/max)=0.000/-0.115/0.049
+  [D_diag run_step    9 global 0197775] grad_L2=2.440093e-01 (params_with_grad=13) amp=False real(mean/min/max)=0.876/0.388/0.953 fake(mean/min/max)=0.000/-0.084/0.064
+  [D_diag run_step   10 global 0197776] grad_L2=5.955335e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.910/0.803/1.082 fake(mean/min/max)=0.009/-0.039/0.098
+  [epoch 039] step 0197800  G=23.8826 (adv=1.0023 l1=22.8803)  D=0.0000[D_weak]  avg_G=26.9853  avg_D=0.0002  VRAM=4.66GB  (5s)
+  [D_diag run_step   50 global 0197816] grad_L2=2.149050e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.900/0.863/0.956 fake(mean/min/max)=0.002/-0.203/0.147
+  [D_diag run_step  100 global 0197866] grad_L2=3.363961e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.899/0.857/0.937 fake(mean/min/max)=-0.002/-0.060/0.070
+  [epoch 039] step 0197900  G=22.3190 (adv=1.0078 l1=21.3113)  D=0.0002[D_weak]  avg_G=24.7632  avg_D=0.0001  VRAM=4.66GB  (16s)
+  [D_diag run_step  150 global 0197916] grad_L2=5.064672e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.899/0.853/0.937 fake(mean/min/max)=-0.000/-0.097/0.043
+  [D_diag run_step  200 global 0197966] grad_L2=4.430603e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.898/0.858/0.976 fake(mean/min/max)=-0.002/-0.058/0.057
+  [epoch 039] step 0198000  G=25.4509 (adv=0.9994 l1=24.4515)  D=0.0000[D_weak]  avg_G=24.5568  avg_D=0.0001  VRAM=4.67GB  (27s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_diag2/ckpts/step0198000
+  [D_diag run_step  250 global 0198016] grad_L2=6.405574e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.898/0.853/0.932 fake(mean/min/max)=-0.002/-0.061/0.042
+  [D_diag run_step  300 global 0198066] grad_L2=2.230560e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.901/0.864/0.958 fake(mean/min/max)=0.000/-0.067/0.034
+  [epoch 039] step 0198100  G=25.6851 (adv=0.9998 l1=24.6853)  D=0.0000[D_weak]  avg_G=24.4698  avg_D=0.0001  VRAM=4.67GB  (40s)
+  [D_diag run_step  350 global 0198116] grad_L2=1.578388e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.901/0.884/0.935 fake(mean/min/max)=0.001/-0.039/0.032
+  [D_diag run_step  400 global 0198166] grad_L2=7.848011e-03 (params_with_grad=13) amp=False real(mean/min/max)=0.900/0.881/0.939 fake(mean/min/max)=0.001/-0.036/0.046
+  [epoch 039] step 0198200  G=25.2456 (adv=0.9991 l1=24.2465)  D=0.0001[D_weak]  avg_G=24.3365  avg_D=0.0001  VRAM=4.67GB  (51s)
+  [D_diag run_step  450 global 0198216] grad_L2=9.446691e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.900/0.848/0.956 fake(mean/min/max)=-0.001/-0.063/0.059
+  [D_diag run_step  500 global 0198266] grad_L2=1.000719e-02 (params_with_grad=13) amp=False real(mean/min/max)=0.902/0.791/0.962 fake(mean/min/max)=0.001/-0.054/0.063
+  [epoch 039] step 0198300  G=25.4782 (adv=1.0008 l1=24.4774)  D=0.0000[D_weak]  avg_G=24.1781  avg_D=0.0002  VRAM=4.67GB  (63s)
+  [epoch 039] step 0198400  G=23.1129 (adv=1.0012 l1=22.1117)  D=0.0000[D_weak]  avg_G=24.0158  avg_D=0.0001  VRAM=4.67GB  (74s)
+  [epoch 039] step 0198500  G=23.7771 (adv=0.9992 l1=22.7779)  D=0.0000[D_weak]  avg_G=23.9384  avg_D=0.0001  VRAM=4.67GB  (86s)
+  [epoch 039] step 0198600  G=24.3441 (adv=1.0004 l1=23.3437)  D=0.0000[D_weak]  avg_G=23.8742  avg_D=0.0001  VRAM=4.67GB  (97s)
+  [epoch 039] step 0198700  G=25.3169 (adv=0.9998 l1=24.3172)  D=0.0000[D_weak]  avg_G=23.7926  avg_D=0.0001  VRAM=4.67GB  (109s)
+  [epoch 039] step 0198800  G=27.1376 (adv=0.9990 l1=26.1386)  D=0.0000[D_weak]  avg_G=23.7495  avg_D=0.0001  VRAM=4.67GB  (120s)
+  [epoch 039] step 0198900  G=22.2709 (adv=0.9995 l1=21.2715)  D=0.0000[D_weak]  avg_G=23.6822  avg_D=0.0002  VRAM=4.67GB  (132s)
+  [epoch 039] step 0199000  G=22.7068 (adv=1.0004 l1=21.7064)  D=0.0000[D_weak]  avg_G=23.6230  avg_D=0.0002  VRAM=4.67GB  (143s)
+  [epoch 039] step 0199100  G=25.8692 (adv=0.9983 l1=24.8709)  D=0.0000[D_weak]  avg_G=23.5758  avg_D=0.0002  VRAM=4.67GB  (155s)
+  [epoch 039] step 0199200  G=22.0852 (adv=0.9996 l1=21.0856)  D=0.0000[D_weak]  avg_G=23.5313  avg_D=0.0002  VRAM=4.67GB  (166s)
+  [epoch 039] step 0199300  G=24.8245 (adv=0.9996 l1=23.8249)  D=0.0000[D_weak]  avg_G=23.4940  avg_D=0.0002  VRAM=4.67GB  (178s)
+  [epoch 039] step 0199400  G=22.2205 (adv=1.0004 l1=21.2200)  D=0.0000[D_weak]  avg_G=23.4445  avg_D=0.0002  VRAM=4.67GB  (189s)
+  [epoch 039] step 0199500  G=21.8743 (adv=0.9998 l1=20.8744)  D=0.0000[D_weak]  avg_G=23.4029  avg_D=0.0002  VRAM=4.67GB  (201s)
+  [epoch 039] step 0199600  G=21.5353 (adv=1.0009 l1=20.5344)  D=0.0000[D_weak]  avg_G=23.3856  avg_D=0.0002  VRAM=4.67GB  (212s)
+  [epoch 039] step 0199700  G=23.5796 (adv=1.0000 l1=22.5796)  D=0.0000[D_weak]  avg_G=23.3510  avg_D=0.0002  VRAM=4.67GB  (224s)
+  [epoch 039] step 0199800  G=21.7352 (adv=0.9999 l1=20.7353)  D=0.0000[D_weak]  avg_G=23.3229  avg_D=0.0002  VRAM=4.67GB  (235s)
+  [epoch 039] step 0199900  G=21.0887 (adv=1.0008 l1=20.0879)  D=0.0000[D_weak]  avg_G=23.2995  avg_D=0.0002  VRAM=4.67GB  (247s)
+
+[epoch 039 done]  avg G=23.2793  avg D=0.0002  time=4.3 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_diag2/ckpts/step0199986
+[*] GAN training complete.
