@@ -34,6 +34,9 @@ cache/
 experiments/**/checkpoints/
 experiments/**/dumps/
 experiments/**/gan_checkpoints/
+# Phase 2 Pix2Pix GAN weights (large .pt; metrics + dump/ montages in runs/ stay tracked)
+experiments/phase2/gan_checkpoints/
+experiments/phase2/runs/gan_v2_retrain/ckpts/
 
 # ── OS-specific ──────────────────────────────────────────────────────────────
 .DS_Store

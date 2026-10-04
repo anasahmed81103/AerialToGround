@@ -35,6 +35,10 @@ matplotlib>=3.7.0
 
 # ── Scientific utilities ────────────────────────────────────────────────────
 scipy>=1.11.0
+scikit-image>=0.21.0
+
+# ── Stage 2 GAN eval (SSIM / LPIPS / FID harness) ───────────────────────────
+lpips>=0.1.4
 
 # ── Live webcam demo (optional — only needed for webcam_demo.py) ────────────
 # opencv-python>=4.8.0

@@ -21,14 +21,18 @@ def tensor_to_uint8_nhwc(t: torch.Tensor) -> np.ndarray:
 
 def mean_ssim(real: torch.Tensor, fake: torch.Tensor) -> float:
     """Per-image SSIM (RGB, data_range=255) averaged over batch."""
+    total, count = ssim_sum(real, fake)
+    return float(total / max(count, 1))
+
+
+def ssim_sum(real: torch.Tensor, fake: torch.Tensor) -> tuple[float, int]:
+    """Return (sum of per-image SSIM, n) for streaming aggregation."""
     r = tensor_to_uint8_nhwc(real)
     f = tensor_to_uint8_nhwc(fake)
-    scores = []
+    total = 0.0
     for i in range(r.shape[0]):
-        scores.append(
-            skimage_ssim(r[i], f[i], channel_axis=2, data_range=255)
-        )
-    return float(np.mean(scores))
+        total += skimage_ssim(r[i], f[i], channel_axis=2, data_range=255)
+    return total, r.shape[0]
 
 
 def _get_lpips():
@@ -45,6 +49,11 @@ _lpips_model = None
 
 
 def mean_lpips(real: torch.Tensor, fake: torch.Tensor, device: torch.device) -> float:
+    total, count = lpips_sum(real, fake, device)
+    return float(total / max(count, 1))
+
+
+def lpips_sum(real: torch.Tensor, fake: torch.Tensor, device: torch.device) -> tuple[float, int]:
     global _lpips_model
     lpips = _get_lpips()
     if _lpips_model is None:
@@ -52,7 +61,8 @@ def mean_lpips(real: torch.Tensor, fake: torch.Tensor, device: torch.device) -> 
         _lpips_model.eval()
     with torch.no_grad():
         d = _lpips_model(real.to(device), fake.to(device))
-    return float(d.mean().cpu())
+    n = int(d.numel())
+    return float(d.sum().cpu()), n
 
 
 class _InceptionFID(torch.nn.Module):
@@ -95,7 +105,9 @@ def _fid_statistics(feats: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 def _fid_distance(mu1, sigma1, mu2, sigma2) -> float:
     from scipy.linalg import sqrtm
     diff = mu1 - mu2
-    covmean, _ = sqrtm(sigma1 @ sigma2, disp=False)
+    covmean = sqrtm(sigma1 @ sigma2)
+    if isinstance(covmean, tuple):
+        covmean = covmean[0]
     if np.iscomplexobj(covmean):
         covmean = covmean.real
     return float(
@@ -106,6 +118,25 @@ def _fid_distance(mu1, sigma1, mu2, sigma2) -> float:
     )
 
 
+def _get_inception_fid(device: torch.device) -> _InceptionFID:
+    global _inception_fid
+    if _inception_fid is None:
+        _inception_fid = _InceptionFID().to(device)
+    return _inception_fid
+
+
+@torch.no_grad()
+def fid_features(images: torch.Tensor, device: torch.device, batch_size: int = 16) -> np.ndarray:
+    """Inception features for FID; processes one tensor without holding the full val set."""
+    net = _get_inception_fid(device)
+    feats = []
+    n = images.shape[0]
+    for start in range(0, n, batch_size):
+        end = min(start + batch_size, n)
+        feats.append(net(images[start:end].to(device)).cpu().numpy())
+    return np.concatenate(feats, axis=0)
+
+
 @torch.no_grad()
 def compute_fid(
     real: torch.Tensor,
@@ -113,15 +144,11 @@ def compute_fid(
     device: torch.device,
     batch_size: int = 16,
 ) -> float:
-    global _inception_fid
-    if _inception_fid is None:
-        _inception_fid = _InceptionFID().to(device)
-    n = real.shape[0]
-    real_feats, fake_feats = [], []
-    for start in range(0, n, batch_size):
-        end = min(start + batch_size, n)
-        real_feats.append(_inception_fid(real[start:end].to(device)).cpu().numpy())
-        fake_feats.append(_inception_fid(fake[start:end].to(device)).cpu().numpy())
-    r = np.concatenate(real_feats, axis=0)
-    f = np.concatenate(fake_feats, axis=0)
+    r = fid_features(real, device, batch_size)
+    f = fid_features(fake, device, batch_size)
     return _fid_distance(*_fid_statistics(r), *_fid_statistics(f))
+
+
+@torch.no_grad()
+def compute_fid_from_features(real_feats: np.ndarray, fake_feats: np.ndarray) -> float:
+    return _fid_distance(*_fid_statistics(real_feats), *_fid_statistics(fake_feats))
