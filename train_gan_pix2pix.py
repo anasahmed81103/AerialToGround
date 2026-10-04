@@ -83,6 +83,10 @@ def get_args():
                    help='Load D weights from --resume_d but use a fresh Adam + GradScaler '
                         '(no optimizer momentum from checkpoint). Useful when fine-tuning '
                         'on a new label distribution after D has saturated.')
+    p.add_argument('--random_init_d', action='store_true',
+                   help='Do not load --resume_d; keep D at random init (G still uses '
+                        '--resume_g). Use when warm-started D is saturated (D_loss ~ 0) on '
+                        'a new label distribution.')
     p.add_argument('--g_steps',      type=int,   default=2,
                    help='Number of Generator updates per Discriminator update. '
                         'Raising this weakens D dominance (recommended: 2-3).')
@@ -313,7 +317,9 @@ def train(args):
         start_step, start_epoch = load_checkpoint(
             args.resume_g, G, opt_G, scaler_G, device)
         print(f'[*] Resumed G from step {start_step}, epoch {start_epoch}')
-    if args.resume_d and os.path.isfile(args.resume_d):
+    if args.random_init_d:
+        print('[*] Discriminator: random init (ignoring --resume_d)')
+    elif args.resume_d and os.path.isfile(args.resume_d):
         load_checkpoint(
             args.resume_d, D, opt_D, scaler_D, device,
             load_optimizer=not args.fresh_d_optimizer,
@@ -393,6 +399,33 @@ def train(args):
 
             opt_D.zero_grad(set_to_none=True)
             scaler_D.scale(loss_D).backward()
+
+            run_step = global_step - start_step + 1
+            if run_step <= 500 and (
+                run_step <= 10 or run_step % 50 == 0 or run_step % args.log_every == 0
+            ):
+                if use_amp:
+                    scaler_D.unscale_(opt_D)
+                d_grad_sq = 0.0
+                n_grad = 0
+                for p in D.parameters():
+                    if p.grad is not None:
+                        g = p.grad.detach().float()
+                        d_grad_sq += g.pow(2).sum().item()
+                        n_grad += 1
+                d_grad_norm = d_grad_sq ** 0.5
+                rs = real_score.detach().float()
+                fs = fake_score.detach().float()
+                print(
+                    f'  [D_diag run_step {run_step:4d} global {global_step + 1:07d}] '
+                    f'grad_L2={d_grad_norm:.6e} (params_with_grad={n_grad}) amp={use_amp} '
+                    f'real(mean/min/max)={rs.mean().item():.3f}/'
+                    f'{rs.min().item():.3f}/{rs.max().item():.3f} '
+                    f'fake(mean/min/max)={fs.mean().item():.3f}/'
+                    f'{fs.min().item():.3f}/{fs.max().item():.3f}',
+                    flush=True,
+                )
+
             scaler_D.step(opt_D)
             scaler_D.update()
 
