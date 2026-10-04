@@ -2,9 +2,9 @@
 import json
 import os
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-run_json = os.path.join(ROOT, 'phase2', 'runs', 'polar_full_classweighted', 'results.json')
-table_path = os.path.join(ROOT, 'results_table.json')
+EXP = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+run_json = os.path.join(EXP, 'phase2', 'runs', 'polar_full_classweighted', 'results.json')
+table_path = os.path.join(EXP, 'results_table.json')
 
 data = json.load(open(run_json))
 t = data['test_full_res']
