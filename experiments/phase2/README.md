@@ -55,9 +55,17 @@ Round 3 — native head resolution (see `code/run_polar_full_64x320.ps1`):
 
 | Variant | Changed | mIoU | Impact |
 |---|---|---|---|
-| `polar_full_64x320` | native head 32x160 -> **64x320** (same test upsample to 224x1232) | pending | tests whether finer native grid helps |
+| `polar_full_64x320` | native head 32x160 -> **64x320** (same test upsample to 224x1232) | **0.5126** | **~0 vs 32x160** — finer native grid does not help at full-res eval |
 
 Architecture note: `PolarLayoutNet` has **no** fixed upsampling stages; `out_hw` sets `row_queries` (H), polar grid width W, and ground-plane prior shape directly. No code change required for 64x320.
+
+Round 4 — class-weighted loss (last Stage 1 experiment, pending RunPod):
+
+| Variant | Changed | mIoU | Impact |
+|---|---|---|---|
+| `polar_full_classweighted` | `--class_weights auto` on focal+dice (inverse freq from `labels_32x160_train.npy`) | pending | target: building IoU vs 0.21 baseline |
+
+New modules: `phase2_class_weights.py`, `phase2_weighted_loss.py`. Launch: `experiments/phase2/code/run_polar_full_classweighted.sh`.
 
 ## 4. Files
 
