@@ -265,6 +265,21 @@
           "road": 0.4956737756729126,
           "building": 0.2142890840768814
         }
+      },
+      "polar_full_classweighted": {
+        "miou": 0.500630795955658,
+        "class_weights": {
+          "sky": 0.49788257479667664,
+          "vegetation": 0.434317022562027,
+          "road": 1.5196220874786377,
+          "building": 1.5481783151626587
+        },
+        "iou": {
+          "sky": 0.6492615342140198,
+          "vegetation": 0.6229671835899353,
+          "road": 0.4929748475551605,
+          "building": 0.23731960356235504
+        }
       }
     },
     "stage1_best_for_paper": "experiments/phase2/runs/polar_full/best.pt (0.5135 test). Native 64x320 run: 0.5126 - use 32x160 for paper.",
@@ -295,6 +310,39 @@
           "vegetation": 0.6568629741668701,
           "road": 0.4956737756729126,
           "building": 0.2142890840768814
+        }
+      }
+    },
+    "polar_full_classweighted": {
+      "name": "polar_full_classweighted",
+      "run_dir": "experiments/phase2/runs/polar_full_classweighted/",
+      "native_out_grid": [
+        32,
+        160
+      ],
+      "class_weights": {
+        "sky": 0.49788257479667664,
+        "vegetation": 0.434317022562027,
+        "road": 1.5196220874786377,
+        "building": 1.5481783151626587
+      },
+      "test_protocol": "bilinear align_corners=True upsample native logits to 224x1232",
+      "training": {
+        "epochs": 8,
+        "batch_size": 16,
+        "params_trainable": 1533702,
+        "peak_vram_gb": 1.376924991607666,
+        "train_minutes": 9.320658882459005
+      },
+      "test_full8884_v2": {
+        "best_epoch": 8,
+        "miou_full": 0.500630795955658,
+        "pixel_acc_full": 0.7089216113090515,
+        "iou": {
+          "sky": 0.6492615342140198,
+          "vegetation": 0.6229671835899353,
+          "road": 0.4929748475551605,
+          "building": 0.23731960356235504
         }
       }
     }

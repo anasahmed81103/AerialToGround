@@ -1,0 +1,26 @@
+{
+  "name": "polar_full_classweighted",
+  "class_weights": {
+    "sky": 0.49788257479667664,
+    "vegetation": 0.434317022562027,
+    "road": 1.5196220874786377,
+    "building": 1.5481783151626587
+  },
+  "params_trainable": 1533702,
+  "peak_vram_gb": 1.376924991607666,
+  "sec_per_epoch": 67.19849374890327,
+  "train_minutes": 9.320658882459005,
+  "best_minival_miou": 0.49675464630126953,
+  "test_full_res": {
+    "n": 8884,
+    "best_epoch": 8,
+    "miou": 0.500630795955658,
+    "acc": 0.7089216113090515,
+    "iou": {
+      "sky": 0.6492615342140198,
+      "vegetation": 0.6229671835899353,
+      "road": 0.4929748475551605,
+      "building": 0.23731960356235504
+    }
+  }
+}

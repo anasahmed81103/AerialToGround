@@ -49,7 +49,7 @@ Round 2 — where the gain comes from (done):
 | `polar_crop224` | full tile -> 224px center crop, 16x16 tokens | 0.5019 | **~−0.012** — full context helps |
 | `polar_vgg16` | DINOv2 -> frozen ImageNet VGG-16 relu5_3, 21x21 | 0.4852 | **~−0.028** — backbone is the largest single factor |
 
-**Stage 1 conclusion:** keep `polar_full` (0.514) as the showcase checkpoint; cite DINOv2 + full tile + shared column decoder. Do not over-claim polar mapping, attention prior, or offsets.
+**Stage 1 conclusion:** keep `polar_full` (0.514) as the showcase checkpoint; cite DINOv2 + full tile + shared column decoder. Do not over-claim polar mapping, attention prior, or offsets. Class-weighted loss (`polar_full_classweighted`, 0.501) trades overall mIoU for slightly higher building IoU — **Stage 1 locked on `polar_full`.**
 
 Round 3 — native head resolution (see `code/run_polar_full_64x320.ps1`):
 
@@ -63,7 +63,7 @@ Round 4 — class-weighted loss (last Stage 1 experiment, pending RunPod):
 
 | Variant | Changed | mIoU | Impact |
 |---|---|---|---|
-| `polar_full_classweighted` | `--class_weights auto` on focal+dice (inverse freq from `labels_32x160_train.npy`) | pending | target: building IoU vs 0.21 baseline |
+| `polar_full_classweighted` | `--class_weights auto` on focal+dice (inverse freq from `labels_32x160_train.npy`) | **0.5006** | building **0.237** (+0.03) but overall mIoU **−0.013** vs polar_full; not used for deploy |
 
 New modules: `phase2_class_weights.py`, `phase2_weighted_loss.py`. Launch: `experiments/phase2/code/run_polar_full_classweighted.sh`.
 
