@@ -4,6 +4,8 @@ eval_gan_pix2pix.py — SSIM / LPIPS / FID on GT semantic maps -> GAN RGB.
 Training uses ground-truth labels_v2/ground/ (standard Pix2Pix). This script
 evaluates the same pairing: GT layout in, compare synthesised RGB to real pano.
 
+Streams batches (does not load the full val set into RAM).
+
 Usage
 -----
   python eval_gan_pix2pix.py \\
@@ -11,7 +13,7 @@ Usage
       --val_csv cvpr_val_v2.csv \\
       --max_samples 512
 
-Full val (8,884): omit --max_samples (slow on CPU; use GPU / RunPod).
+Full val (8,884): omit --max_samples (GPU / RunPod).
 """
 
 import argparse
@@ -19,10 +21,16 @@ import json
 import os
 import time
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from gan_metrics import compute_fid, mean_lpips, mean_ssim
+from gan_metrics import (
+    compute_fid_from_features,
+    fid_features,
+    lpips_sum,
+    ssim_sum,
+)
 from gan_unet_model import UNetGenerator
 from train_gan_pix2pix import GANDataset
 
@@ -68,31 +76,50 @@ def main():
     )
     dl = DataLoader(ds, batch_size=args.batch_size, shuffle=False, num_workers=0)
 
-    all_real, all_fake = [], []
+    ssim_total = lpips_total = 0.0
+    n_ssim = n_lpips = 0
+    real_fid_chunks: list[np.ndarray] = []
+    fake_fid_chunks: list[np.ndarray] = []
+    n_images = 0
+
     t0 = time.time()
-    for label, real in dl:
+    for bi, (label, real) in enumerate(dl):
         label = label.to(device)
         fake = G(label)
-        all_real.append(real)
-        all_fake.append(fake.cpu())
+        n_images += real.shape[0]
 
-    real_cat = torch.cat(all_real, dim=0)
-    fake_cat = torch.cat(all_fake, dim=0)
+        st, sc = ssim_sum(real, fake.cpu())
+        ssim_total += st
+        n_ssim += sc
+
+        if not args.skip_lpips:
+            lt, lc = lpips_sum(real, fake, device)
+            lpips_total += lt
+            n_lpips += lc
+
+        if not args.skip_fid:
+            real_fid_chunks.append(fid_features(real, device, args.batch_size))
+            fake_fid_chunks.append(fid_features(fake.cpu(), device, args.batch_size))
+
+        if (bi + 1) % 100 == 0:
+            print(f'[*] processed {n_images} images...')
 
     metrics = {
         'gan_ckpt': args.gan_ckpt,
         'val_csv': args.val_csv,
-        'n_images': int(real_cat.shape[0]),
+        'n_images': n_images,
         'generator_step': step,
-        'ssim': mean_ssim(real_cat, fake_cat),
+        'ssim': ssim_total / max(n_ssim, 1),
     }
     if not args.skip_lpips:
-        metrics['lpips'] = mean_lpips(real_cat, fake_cat, device)
-    if not args.skip_fid and real_cat.shape[0] >= 64:
-        metrics['fid'] = compute_fid(real_cat, fake_cat, device, batch_size=args.batch_size)
+        metrics['lpips'] = lpips_total / max(n_lpips, 1)
+    if not args.skip_fid and n_images >= 64:
+        real_feats = np.concatenate(real_fid_chunks, axis=0)
+        fake_feats = np.concatenate(fake_fid_chunks, axis=0)
+        metrics['fid'] = compute_fid_from_features(real_feats, fake_feats)
     elif not args.skip_fid:
         metrics['fid'] = None
-        metrics['fid_note'] = 'need >= 64 images for stable FID; use full val on RunPod'
+        metrics['fid_note'] = 'need >= 64 images for stable FID'
 
     metrics['elapsed_sec'] = round(time.time() - t0, 2)
 

@@ -1,0 +1,10 @@
+{
+  "gan_ckpt": "experiments/phase2/gan_checkpoints/gan_v2_retrain/G_step0231066.pt",
+  "val_csv": "cvpr_val_v2.csv",
+  "n_images": 8884,
+  "generator_step": 231066,
+  "ssim": 0.5158942760998017,
+  "lpips": 0.6183079649928667,
+  "fid": 164.38776713683197,
+  "elapsed_sec": 538.46
+}

@@ -1,0 +1,11 @@
+Stage 1 (PolarLayoutNet) — tracked under runs/<name>/best.pt
+
+Stage 2 (Pix2Pix v2 retrain) — large G/D pairs (gitignored):
+  experiments/phase2/gan_checkpoints/gan_v2_retrain/G_step0231066.pt
+  experiments/phase2/gan_checkpoints/gan_v2_retrain/D_step0231066.pt
+
+Optional local junction:
+  outputs/ckpts_gan_v2/  ->  experiments/phase2/gan_checkpoints/gan_v2_retrain/
+
+Warm-start (v1 labels):
+  experiments/baseline/gan_checkpoints/  or  outputs/ckpts_gan/

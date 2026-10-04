@@ -1,0 +1,69 @@
+[*] polar_full_64x320: 1.55 M trainable params  train 33532  minival 2000  test 8884
+/usr/local/lib/python3.12/dist-packages/torch/optim/lr_scheduler.py:192: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+  [ep 01] 200/1047  loss 1.0354  lr 1.21e-04  (47s)
+  [ep 01] 400/1047  loss 0.9716  lr 2.41e-04  (85s)
+  [ep 01] 600/1047  loss 0.9411  lr 3.00e-04  (122s)
+  [ep 01] 800/1047  loss 0.9210  lr 2.99e-04  (160s)
+  [ep 01] 1000/1047  loss 0.9073  lr 2.97e-04  (197s)
+  [ep 01] 1047/1047  loss 0.9044  lr 2.96e-04  (206s)
+[ep 01] minival mIoU 0.4807  sky 0.670  vegetation 0.632  road 0.450  building 0.170
+    new best -> experiments/phase2/runs/polar_full_64x320/best.pt
+  [ep 02] 200/1047  loss 0.8269  lr 2.93e-04  (38s)
+  [ep 02] 400/1047  loss 0.8278  lr 2.89e-04  (75s)
+  [ep 02] 600/1047  loss 0.8301  lr 2.85e-04  (113s)
+  [ep 02] 800/1047  loss 0.8280  lr 2.79e-04  (150s)
+  [ep 02] 1000/1047  loss 0.8263  lr 2.72e-04  (188s)
+  [ep 02] 1047/1047  loss 0.8258  lr 2.71e-04  (197s)
+[ep 02] minival mIoU 0.4821  sky 0.671  vegetation 0.649  road 0.481  building 0.127
+    new best -> experiments/phase2/runs/polar_full_64x320/best.pt
+  [ep 03] 200/1047  loss 0.8121  lr 2.63e-04  (38s)
+  [ep 03] 400/1047  loss 0.8105  lr 2.55e-04  (75s)
+  [ep 03] 600/1047  loss 0.8083  lr 2.46e-04  (112s)
+  [ep 03] 800/1047  loss 0.8061  lr 2.37e-04  (150s)
+  [ep 03] 1000/1047  loss 0.8055  lr 2.27e-04  (187s)
+  [ep 03] 1047/1047  loss 0.8058  lr 2.24e-04  (196s)
+[ep 03] minival mIoU 0.5046  sky 0.692  vegetation 0.642  road 0.488  building 0.196
+    new best -> experiments/phase2/runs/polar_full_64x320/best.pt
+  [ep 04] 200/1047  loss 0.7912  lr 2.14e-04  (38s)
+  [ep 04] 400/1047  loss 0.7929  lr 2.03e-04  (75s)
+  [ep 04] 600/1047  loss 0.7940  lr 1.91e-04  (113s)
+  [ep 04] 800/1047  loss 0.7938  lr 1.80e-04  (150s)
+  [ep 04] 1000/1047  loss 0.7924  lr 1.68e-04  (187s)
+  [ep 04] 1047/1047  loss 0.7921  lr 1.65e-04  (196s)
+[ep 04] minival mIoU 0.5048  sky 0.682  vegetation 0.650  road 0.494  building 0.194
+    new best -> experiments/phase2/runs/polar_full_64x320/best.pt
+  [ep 05] 200/1047  loss 0.7796  lr 1.53e-04  (38s)
+  [ep 05] 400/1047  loss 0.7794  lr 1.41e-04  (75s)
+  [ep 05] 600/1047  loss 0.7796  lr 1.29e-04  (113s)
+  [ep 05] 800/1047  loss 0.7798  lr 1.17e-04  (150s)
+  [ep 05] 1000/1047  loss 0.7786  lr 1.06e-04  (188s)
+  [ep 05] 1047/1047  loss 0.7785  lr 1.03e-04  (196s)
+[ep 05] minival mIoU 0.5057  sky 0.692  vegetation 0.658  road 0.495  building 0.178
+    new best -> experiments/phase2/runs/polar_full_64x320/best.pt
+  [ep 06] 200/1047  loss 0.7707  lr 9.19e-05  (38s)
+  [ep 06] 400/1047  loss 0.7674  lr 8.11e-05  (75s)
+  [ep 06] 600/1047  loss 0.7662  lr 7.07e-05  (112s)
+  [ep 06] 800/1047  loss 0.7663  lr 6.08e-05  (150s)
+  [ep 06] 1000/1047  loss 0.7656  lr 5.15e-05  (187s)
+  [ep 06] 1047/1047  loss 0.7657  lr 4.94e-05  (196s)
+[ep 06] minival mIoU 0.5100  sky 0.685  vegetation 0.658  road 0.495  building 0.202
+    new best -> experiments/phase2/runs/polar_full_64x320/best.pt
+  [ep 07] 200/1047  loss 0.7618  lr 4.08e-05  (38s)
+  [ep 07] 400/1047  loss 0.7545  lr 3.30e-05  (75s)
+  [ep 07] 600/1047  loss 0.7548  lr 2.59e-05  (113s)
+  [ep 07] 800/1047  loss 0.7545  lr 1.95e-05  (150s)
+  [ep 07] 1000/1047  loss 0.7542  lr 1.41e-05  (188s)
+  [ep 07] 1047/1047  loss 0.7540  lr 1.29e-05  (196s)
+[ep 07] minival mIoU 0.5123  sky 0.688  vegetation 0.656  road 0.498  building 0.207
+    new best -> experiments/phase2/runs/polar_full_64x320/best.pt
+  [ep 08] 200/1047  loss 0.7470  lr 8.48e-06  (37s)
+  [ep 08] 400/1047  loss 0.7466  lr 4.97e-06  (75s)
+  [ep 08] 600/1047  loss 0.7475  lr 2.38e-06  (112s)
+  [ep 08] 800/1047  loss 0.7458  lr 7.27e-07  (150s)
+  [ep 08] 1000/1047  loss 0.7465  lr 2.64e-08  (187s)
+  [ep 08] 1047/1047  loss 0.7466  lr 0.00e+00  (196s)
+[ep 08] minival mIoU 0.5123  sky 0.691  vegetation 0.658  road 0.498  building 0.201
+[*] Test eval on 8884 images at 224x1232 ...
+[test] mIoU 0.5126  sky 0.684  vegetation 0.657  road 0.496  building 0.214
+[*] Wrote experiments/phase2/runs/polar_full_64x320/results.json
