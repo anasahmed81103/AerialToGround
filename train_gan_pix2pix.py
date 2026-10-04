@@ -48,8 +48,9 @@ from gan_unet_model import UNetGenerator, PatchDiscriminator
 
 def get_args():
     p = argparse.ArgumentParser(description='Pix2Pix GAN — semantic map → ground RGB')
-    p.add_argument('--train_csv',    default='cvpr_train.csv')
-    p.add_argument('--val_csv',      default='cvpr_val.csv')
+    p.add_argument('--train_csv',    default='cvpr_train_v2.csv',
+                   help='GT semantic maps (labels_v2/ground/) + panos — not Stage-1 predictions.')
+    p.add_argument('--val_csv',      default='cvpr_val_v2.csv')
     p.add_argument('--max_samples',  type=int, default=None,
                    help='Cap training set size (None = use all). '
                         'Tip: --max_samples 5000 for a 1-2 h quick run.')

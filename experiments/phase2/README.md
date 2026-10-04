@@ -67,6 +67,22 @@ Round 4 — class-weighted loss (last Stage 1 experiment, pending RunPod):
 
 New modules: `phase2_class_weights.py`, `phase2_weighted_loss.py`. Launch: `experiments/phase2/code/run_polar_full_classweighted.sh`.
 
+---
+
+## Stage 2 (Pix2Pix GAN) — next
+
+| Item | Choice |
+|------|--------|
+| Stage 1 layout for **paper / mIoU** | `polar_full/best.pt` (0.514) |
+| GAN **training** supervision | GT `labels_v2/ground/` + panos via `cvpr_train_v2.csv` |
+| GAN **demo / E2E** | `polar_full` predicted layouts at inference only |
+| Warm-start | `G_step0197766.pt` / `D_step0197766.pt` (v1 labels) |
+| Metrics | `eval_gan_pix2pix.py` — SSIM, LPIPS, FID on val |
+| Smoke (local) | `python smoke_gan_v2.py` |
+| Full retrain (RunPod) | `experiments/phase2/code/run_gan_v2_retrain.sh` |
+
+Paper one-liner for class-weighted: inverse-frequency loss improves building IoU (+0.03) but lowers mIoU (−0.013); main Stage 1 result stays unweighted `polar_full`.
+
 ## 4. Files
 
 - `runs/<name>/`: `config.json`, `minival_curve.csv`, `best.pt`, `results.json`, `showcase/`
