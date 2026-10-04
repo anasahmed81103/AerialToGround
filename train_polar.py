@@ -28,6 +28,9 @@ from torch.utils.data import DataLoader, Dataset
 
 from polar_layout_model import PolarLayoutNet
 from semantic_metrics import CLASS_NAMES, ConfusionMeter, colorize_label
+from phase2_class_weights import format_weights, inverse_frequency_weights, parse_class_weights
+from phase2_weighted_loss import dice_loss as dice_loss_w
+from phase2_weighted_loss import focal_ce as focal_ce_w
 from train_crossnet import dice_loss, focal_ce
 
 
@@ -67,6 +70,9 @@ def get_args():
     p.add_argument('--save_n', type=int, default=8)
     p.add_argument('--resume', default='',
                    help='Path to last.pt (or run dir) to continue training')
+    p.add_argument('--class_weights', default='',
+                   help='Per-class loss weights: empty=uniform, auto=inverse freq from '
+                        'train label cache, or comma-separated (sky,veg,road,building)')
     return p.parse_args()
 
 
@@ -202,6 +208,29 @@ def main():
     train_labels = label_cache(train_rows, hw, os.path.join(
         args.cache, f'labels_{hw[0]}x{hw[1]}_train.npy'))
 
+    cw_spec = args.class_weights.strip()
+    if cw_spec.lower() == 'auto':
+        hist = inverse_frequency_weights(train_labels, len(CLASS_NAMES))
+        print('[*] Class pixel counts (32x160 train cache): ' +
+              '  '.join(f'{n}={int(hist["counts"][i])}' for i, n in enumerate(CLASS_NAMES)),
+              flush=True)
+        print('[*] Class frequencies: ' +
+              '  '.join(f'{n}={hist["freq"][i]:.4f}' for i, n in enumerate(CLASS_NAMES)),
+              flush=True)
+    class_weight_np = parse_class_weights(cw_spec, train_labels, len(CLASS_NAMES))
+    if cw_spec:
+        print(f'[*] Loss class weights (mean=1): {format_weights(class_weight_np)}', flush=True)
+    class_weight_t = torch.tensor(class_weight_np, dtype=torch.float32)
+
+    def compute_loss(logits, y):
+        if cw_spec:
+            return (
+                focal_ce_w(logits, y, gamma=args.focal_gamma, class_weight=class_weight_t)
+                + dice_loss_w(logits, y, len(CLASS_NAMES), class_weight=class_weight_t)
+            )
+        return focal_ce(logits, y, gamma=args.focal_gamma) + dice_loss(
+            logits, y, len(CLASS_NAMES))
+
     mv_path = os.path.join(run_dir, 'minival_indices.npy')
     if os.path.isfile(mv_path):
         mv_idx = np.load(mv_path)
@@ -290,8 +319,7 @@ def main():
             with torch.autocast('cuda', enabled=args.amp and device.type == 'cuda'):
                 logits = model(f)
             logits = logits.float()
-            loss = focal_ce(logits, y, gamma=args.focal_gamma) + dice_loss(
-                logits, y, len(CLASS_NAMES))
+            loss = compute_loss(logits, y)
             opt.zero_grad(set_to_none=True)
             scaler.scale(loss).backward()
             scaler.unscale_(opt)
@@ -330,6 +358,9 @@ def main():
 
     summary = {
         'name': args.name,
+        'class_weights': {
+            n: float(class_weight_np[i]) for i, n in enumerate(CLASS_NAMES)
+        } if cw_spec else None,
         'params_trainable': n_params,
         'peak_vram_gb': (torch.cuda.max_memory_allocated() / 1024 ** 3
                          if device.type == 'cuda' else 0.0),

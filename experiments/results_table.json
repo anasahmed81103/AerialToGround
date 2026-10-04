@@ -62,7 +62,10 @@
       "lr": 0.001,
       "flip": true,
       "aux_weight": 0.5,
-      "loss_grid": [32, 160],
+      "loss_grid": [
+        32,
+        160
+      ],
       "best_ckpt": "crossnet_best.pt",
       "val_during_train_n": 1024
     },
@@ -71,19 +74,34 @@
       "epoch_1": {
         "step": 8883,
         "miou_full": 0.372695,
-        "iou": {"sky": 0.607890, "vegetation": 0.532672, "road": 0.321260, "building": 0.028958}
+        "iou": {
+          "sky": 0.60789,
+          "vegetation": 0.532672,
+          "road": 0.32126,
+          "building": 0.028958
+        }
       },
       "epoch_8_near_plateau": {
         "step": 71064,
         "miou_full": 0.402111,
-        "iou": {"sky": 0.631857, "vegetation": 0.533455, "road": 0.361986, "building": 0.081145}
+        "iou": {
+          "sky": 0.631857,
+          "vegetation": 0.533455,
+          "road": 0.361986,
+          "building": 0.081145
+        }
       },
       "epoch_20_final": {
         "step": 177660,
         "miou_full": 0.402718,
         "miou_native": 0.388434,
         "pixel_acc_full": 0.665896,
-        "iou": {"sky": 0.632686, "vegetation": 0.534533, "road": 0.360996, "building": 0.082657}
+        "iou": {
+          "sky": 0.632686,
+          "vegetation": 0.534533,
+          "road": 0.360996,
+          "building": 0.082657
+        }
       }
     },
     "fair_old_model_on_v2_n1024": {
@@ -92,15 +110,15 @@
       "source_file": "experiments/phase1/results/fair_old_model_on_v2_n1024.json",
       "miou_full": 0.2992,
       "miou_native_8x40": 0.2777,
-      "pixel_acc_full": 0.4350,
+      "pixel_acc_full": 0.435,
       "iou": {
         "sky": 0.6393,
         "vegetation": 0.0298,
-        "road": 0.4320,
+        "road": 0.432,
         "building": 0.0959
       },
       "gt_pixel_share": {
-        "sky": 0.360,
+        "sky": 0.36,
         "vegetation": 0.405,
         "road": 0.118,
         "building": 0.117
@@ -118,38 +136,168 @@
     "name": "Frozen DINOv2-S/14+reg (full 750px tile @336) + PolarLayoutNet (polar grid + offsets + ground-plane-prior column decoder)",
     "run_dir": "experiments/phase2/runs/polar_full/",
     "protocol": "select best epoch on 2000-image minival carved from train (seed 0); report on full 8884 test, v2 labels, 224x1232",
-    "training": {"epochs": 8, "batch_size": 16, "lr": 0.0003, "out_grid": [32, 160], "loss": "focal(g=2)+dice", "flip": true,
-                 "params_trainable": 1533702, "peak_vram_gb": 1.98, "train_minutes": 234.1, "gpu": "Quadro P1000 4GB"},
+    "training": {
+      "epochs": 8,
+      "batch_size": 16,
+      "lr": 0.0003,
+      "out_grid": [
+        32,
+        160
+      ],
+      "loss": "focal(g=2)+dice",
+      "flip": true,
+      "params_trainable": 1533702,
+      "peak_vram_gb": 1.98,
+      "train_minutes": 234.1,
+      "gpu": "Quadro P1000 4GB"
+    },
     "best_minival_miou": 0.5125,
     "test_full8884_v2": {
       "best_epoch": 7,
       "miou_full": 0.5135,
       "pixel_acc_full": 0.7454,
-      "iou": {"sky": 0.6892, "vegetation": 0.6612, "road": 0.4944, "building": 0.2093}
+      "iou": {
+        "sky": 0.6892,
+        "vegetation": 0.6612,
+        "road": 0.4944,
+        "building": 0.2093
+      }
     },
     "fair_old_models_full8884_v2": {
-      "baseline_88830": {"source_file": "experiments/baseline/results/eval_v2_labels_full8884/val_metrics_latest.json",
-                         "miou_full": 0.2993, "miou_native_8x40": 0.2772, "pixel_acc_full": 0.4340,
-                         "iou": {"sky": 0.6384, "vegetation": 0.0262, "road": 0.4378, "building": 0.0949}},
-      "phase1_best": {"source_file": "experiments/phase1/results/eval_v2_labels_full8884/val_metrics_latest.json",
-                      "miou_full": 0.4019, "miou_native_8x40": 0.3859, "pixel_acc_full": 0.6650,
-                      "iou": {"sky": 0.6330, "vegetation": 0.5325, "road": 0.3621, "building": 0.0802}}
+      "baseline_88830": {
+        "source_file": "experiments/baseline/results/eval_v2_labels_full8884/val_metrics_latest.json",
+        "miou_full": 0.2993,
+        "miou_native_8x40": 0.2772,
+        "pixel_acc_full": 0.434,
+        "iou": {
+          "sky": 0.6384,
+          "vegetation": 0.0262,
+          "road": 0.4378,
+          "building": 0.0949
+        }
+      },
+      "phase1_best": {
+        "source_file": "experiments/phase1/results/eval_v2_labels_full8884/val_metrics_latest.json",
+        "miou_full": 0.4019,
+        "miou_native_8x40": 0.3859,
+        "pixel_acc_full": 0.665,
+        "iou": {
+          "sky": 0.633,
+          "vegetation": 0.5325,
+          "road": 0.3621,
+          "building": 0.0802
+        }
+      }
     },
     "ablations_test_full8884_v2": {
-      "polar_full (learned prior + offsets)": {"miou": 0.5135, "iou": {"sky": 0.689, "vegetation": 0.661, "road": 0.494, "building": 0.209}},
-      "polar_prior_none": {"miou": 0.5139, "iou": {"sky": 0.690, "vegetation": 0.662, "road": 0.494, "building": 0.209}},
-      "polar_prior_fixed": {"miou": 0.5133, "iou": {"sky": 0.688, "vegetation": 0.660, "road": 0.495, "building": 0.210}},
-      "polar_no_offsets": {"miou": 0.5142, "iou": {"sky": 0.691, "vegetation": 0.663, "road": 0.497, "building": 0.206}},
+      "polar_full (learned prior + offsets)": {
+        "miou": 0.5135,
+        "iou": {
+          "sky": 0.689,
+          "vegetation": 0.661,
+          "road": 0.494,
+          "building": 0.209
+        }
+      },
+      "polar_prior_none": {
+        "miou": 0.5139,
+        "iou": {
+          "sky": 0.69,
+          "vegetation": 0.662,
+          "road": 0.494,
+          "building": 0.209
+        }
+      },
+      "polar_prior_fixed": {
+        "miou": 0.5133,
+        "iou": {
+          "sky": 0.688,
+          "vegetation": 0.66,
+          "road": 0.495,
+          "building": 0.21
+        }
+      },
+      "polar_no_offsets": {
+        "miou": 0.5142,
+        "iou": {
+          "sky": 0.691,
+          "vegetation": 0.663,
+          "road": 0.497,
+          "building": 0.206
+        }
+      },
       "finding_round1": "Attention prior and learned offsets have no measurable effect (all within +/-0.001).",
-      "polar_dense_mapping": {"miou": 0.5138, "params": 4480516,
-        "iou": {"sky": 0.688, "vegetation": 0.660, "road": 0.499, "building": 0.207}},
-      "polar_crop224": {"miou": 0.5019,
-        "iou": {"sky": 0.675, "vegetation": 0.643, "road": 0.491, "building": 0.198}},
-      "polar_vgg16": {"miou": 0.4852,
-        "iou": {"sky": 0.664, "vegetation": 0.627, "road": 0.468, "building": 0.181}},
-      "finding_round2": "Single-change ablations on full 8884 test: DINOv2 vs VGG-16 ~+0.028 mIoU; full tile vs 224px crop ~+0.012; polar geometry vs learned dense M ~0 (dense slightly higher). Stage-1 best remains polar_full / polar_no_offsets (~0.514); paper should credit frozen foundation features + full-tile context + lightweight column decoder, not attention prior or polar vs dense."
+      "polar_dense_mapping": {
+        "miou": 0.5138,
+        "params": 4480516,
+        "iou": {
+          "sky": 0.688,
+          "vegetation": 0.66,
+          "road": 0.499,
+          "building": 0.207
+        }
+      },
+      "polar_crop224": {
+        "miou": 0.5019,
+        "iou": {
+          "sky": 0.675,
+          "vegetation": 0.643,
+          "road": 0.491,
+          "building": 0.198
+        }
+      },
+      "polar_vgg16": {
+        "miou": 0.4852,
+        "iou": {
+          "sky": 0.664,
+          "vegetation": 0.627,
+          "road": 0.468,
+          "building": 0.181
+        }
+      },
+      "finding_round2": "Single-change ablations on full 8884 test: DINOv2 vs VGG-16 ~+0.028 mIoU; full tile vs 224px crop ~+0.012; polar geometry vs learned dense M ~0 (dense slightly higher). Stage-1 best remains polar_full / polar_no_offsets (~0.514); paper should credit frozen foundation features + full-tile context + lightweight column decoder, not attention prior or polar vs dense.",
+      "polar_full_64x320": {
+        "miou": 0.5125901699066162,
+        "native_grid": "64x320",
+        "iou": {
+          "sky": 0.6835348010063171,
+          "vegetation": 0.6568629741668701,
+          "road": 0.4956737756729126,
+          "building": 0.2142890840768814
+        }
+      }
     },
-    "stage1_best_for_paper": "experiments/phase2/runs/polar_full/best.pt (or polar_no_offsets — same mIoU, simpler story)"
+    "stage1_best_for_paper": "experiments/phase2/runs/polar_full/best.pt (0.5135 test). Native 64x320 run: 0.5126 - use 32x160 for paper.",
+    "finding_round3_resolution": "64x320 native head does not beat 32x160 at 224x1232 eval (0.5126 vs 0.5135).",
+    "polar_full_64x320": {
+      "name": "polar_full_64x320",
+      "run_dir": "experiments/phase2/runs/polar_full_64x320/",
+      "native_out_grid": [
+        64,
+        320
+      ],
+      "test_protocol": "bilinear align_corners=True upsample native logits to 224x1232",
+      "training": {
+        "epochs": 8,
+        "batch_size": 32,
+        "amp": true,
+        "gpu": "RTX 4090 (RunPod)",
+        "params_trainable": 1546246,
+        "peak_vram_gb": 9.24,
+        "train_minutes": 27.0
+      },
+      "test_full8884_v2": {
+        "best_epoch": 7,
+        "miou_full": 0.5125901699066162,
+        "pixel_acc_full": 0.7410745024681091,
+        "iou": {
+          "sky": 0.6835348010063171,
+          "vegetation": 0.6568629741668701,
+          "road": 0.4956737756729126,
+          "building": 0.2142890840768814
+        }
+      }
+    }
   },
   "do_not_compare_directly": "Baseline 0.45 mIoU is on old SegNet labels (trees often labeled building). Phase 1 0.40 is on SegFormer labels. Fair comparison is the 0.30 vs 0.40 pair on v2 labels."
 }
