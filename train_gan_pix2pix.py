@@ -79,6 +79,10 @@ def get_args():
     p.add_argument('--save_every',   type=int,   default=2000)
     p.add_argument('--resume_g',     default='', help='Generator checkpoint to resume from.')
     p.add_argument('--resume_d',     default='', help='Discriminator checkpoint to resume from.')
+    p.add_argument('--fresh_d_optimizer', action='store_true',
+                   help='Load D weights from --resume_d but use a fresh Adam + GradScaler '
+                        '(no optimizer momentum from checkpoint). Useful when fine-tuning '
+                        'on a new label distribution after D has saturated.')
     p.add_argument('--g_steps',      type=int,   default=2,
                    help='Number of Generator updates per Discriminator update. '
                         'Raising this weakens D dominance (recommended: 2-3).')
@@ -214,11 +218,20 @@ def save_checkpoints(G, D, opt_G, opt_D, scaler_G, scaler_D,
     print(f'    [ckpt] saved → {ckpt_dir}/{tag}')
 
 
-def load_checkpoint(path: str, model: nn.Module, opt, scaler, device):
+def load_checkpoint(
+    path: str,
+    model: nn.Module,
+    opt,
+    scaler,
+    device,
+    *,
+    load_optimizer: bool = True,
+):
     ck = torch.load(path, map_location=device, weights_only=False)
     model.load_state_dict(ck['model'])
-    opt.load_state_dict(ck['optimizer'])
-    scaler.load_state_dict(ck['scaler'])
+    if load_optimizer:
+        opt.load_state_dict(ck['optimizer'])
+        scaler.load_state_dict(ck['scaler'])
     return ck['step'], ck['epoch']
 
 
@@ -301,8 +314,14 @@ def train(args):
             args.resume_g, G, opt_G, scaler_G, device)
         print(f'[*] Resumed G from step {start_step}, epoch {start_epoch}')
     if args.resume_d and os.path.isfile(args.resume_d):
-        load_checkpoint(args.resume_d, D, opt_D, scaler_D, device)
-        print('[*] Resumed D from checkpoint')
+        load_checkpoint(
+            args.resume_d, D, opt_D, scaler_D, device,
+            load_optimizer=not args.fresh_d_optimizer,
+        )
+        if args.fresh_d_optimizer:
+            print('[*] Resumed D weights only (fresh Adam + GradScaler for D)')
+        else:
+            print('[*] Resumed D from checkpoint')
 
     # --epochs means "run this many MORE epochs from the resume point".
     end_epoch = start_epoch + args.epochs
