@@ -34,9 +34,11 @@ cache/
 experiments/**/checkpoints/
 experiments/**/dumps/
 experiments/**/gan_checkpoints/
-# Phase 2 Pix2Pix GAN weights (large .pt; metrics + dump/ montages in runs/ stay tracked)
+# Phase 2: .pt weights only (GAN dump/ montages ~few MB stay tracked)
 experiments/phase2/gan_checkpoints/
-experiments/phase2/runs/gan_v2_retrain/ckpts/
+experiments/**/runs/**/ckpts/
+experiments/**/runs/**/best.pt
+experiments/**/runs/**/last.pt
 
 # ── OS-specific ──────────────────────────────────────────────────────────────
 .DS_Store
@@ -61,6 +63,6 @@ desktop.ini
 # ──────────────────────────────
 #   demo/                  — sample aerial images for quickstart
 #   assets/                — README visual assets (comparison strips, etc.)
-#   experiments/           — code snapshots + number tables (not weights/dumps)
+#   experiments/           — code snapshots + metrics JSON/CSV/logs/showcase (not .pt or gan dump/)
 #   cvpr_train.csv / cvpr_val.csv / cvpr_*_v2.csv — path lists only
 # ===========================================================================

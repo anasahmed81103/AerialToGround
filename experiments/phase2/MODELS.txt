@@ -1,4 +1,5 @@
-Stage 1 (PolarLayoutNet) — tracked under runs/<name>/best.pt
+Stage 1 (PolarLayoutNet) — gitignored weights (local only):
+  experiments/phase2/runs/polar_full/best.pt
 
 Stage 2 (Pix2Pix v2 retrain) — large G/D pairs (gitignored):
   experiments/phase2/gan_checkpoints/gan_v2_retrain/G_step0231066.pt
