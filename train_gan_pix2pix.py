@@ -94,6 +94,9 @@ def get_args():
                    help='One-sided label smoothing for D real targets (0.9 = soft real). '
                         'Prevents D from becoming overconfident. Set to 1.0 to disable.')
     p.add_argument('--no_amp',       action='store_true', help='Disable AMP (use FP32 throughout).')
+    p.add_argument('--d_diag_max_steps', type=int, default=500,
+                   help='Print [D_diag] through this many run-steps after resume (0=off). '
+                        'Use ~4500 for a 2-epoch gan_v2_diag3 run.')
     return p.parse_args()
 
 
@@ -401,7 +404,8 @@ def train(args):
             scaler_D.scale(loss_D).backward()
 
             run_step = global_step - start_step + 1
-            if run_step <= 500 and (
+            d_diag_cap = args.d_diag_max_steps
+            if d_diag_cap > 0 and run_step <= d_diag_cap and (
                 run_step <= 10 or run_step % 50 == 0 or run_step % args.log_every == 0
             ):
                 if use_amp:
