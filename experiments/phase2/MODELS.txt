@@ -12,6 +12,11 @@ Stage 2 ablation — warm-started D collapse (negative result, same G step id):
 Warm-start generator (v1 labels, for all v2 GAN runs):
   outputs/ckpts_gan/G_step0197766.pt
 
+Stage 2 SPADE (train next; gitignored G/D when done):
+  experiments/phase2/runs/spade_v2/ckpts/
+  Launch: experiments/phase2/code/run_spade_v2.sh
+
 Eval metrics (tracked):
   experiments/phase2/runs/gan_v2_random_d/val_metrics_full.json
   experiments/phase2/runs/gan_v2_retrain/val_metrics_full.json
+  experiments/phase2/runs/spade_v2/val_metrics_full.json  (after eval)

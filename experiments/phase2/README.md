@@ -104,7 +104,26 @@ python eval_gan_pix2pix.py --gan_ckpt experiments/phase2/runs/gan_v2_random_d/ck
   --out_json experiments/phase2/runs/gan_v2_random_d/val_metrics_full.json
 ```
 
-**Next (Stage 2 upgrade):** SPADE — target FID below 157.6; carry random D, g_steps=3, lower λ_L1, perceptual loss.
+### Stage 2 upgrade — SPADE (in repo, train on RunPod)
+
+| Item | Choice |
+|------|--------|
+| Generator | `spade_model.SPADEGenerator` (`--generator spade`) |
+| Discriminator | Same PatchGAN as Pix2Pix |
+| Loss | LSGAN + **λ_L1=10** + **VGG perceptual=10** (defaults in `run_spade_v2.sh`) |
+| D training | **Random D**, **g_steps=3** (same lesson as `gan_v2_random_d`) |
+| G init | **From scratch** (do not load U-Net `G_step0197766`) |
+| Target | Beat Pix2Pix **FID 157.6** on full val |
+
+```bash
+bash experiments/phase2/code/run_spade_v2.sh
+python eval_gan_pix2pix.py --generator spade \
+  --gan_ckpt experiments/phase2/runs/spade_v2/ckpts/G_stepXXXXXXX.pt \
+  --val_csv cvpr_val_v2.csv --batch_size 4 \
+  --out_json experiments/phase2/runs/spade_v2/val_metrics_full.json
+```
+
+Local sanity: `python smoke_spade.py`
 
 Paper one-liner for class-weighted (Stage 1): inverse-frequency loss improves building IoU (+0.03) but lowers mIoU (−0.013); main Stage 1 result stays unweighted `polar_full`.
 

@@ -40,6 +40,8 @@ from torch.utils.data import Dataset, DataLoader
 from torch.amp import GradScaler, autocast
 
 from gan_unet_model import UNetGenerator, PatchDiscriminator
+from spade_model import SPADEGenerator
+from gan_perceptual_loss import VGGPerceptualLoss
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -60,8 +62,13 @@ def get_args():
     p.add_argument('--epochs',       type=int,   default=10)
     p.add_argument('--lr',           type=float, default=2e-4,
                    help='Adam LR for both G and D (decays linearly after epoch=epochs//2)')
+    p.add_argument('--generator',    choices=('unet', 'spade'), default='unet',
+                   help='Generator architecture (spade = layout-conditioned SPADE net).')
     p.add_argument('--lambda_l1',    type=float, default=100.0,
-                   help='Weight of pixel-wise L1 loss relative to adversarial loss.')
+                   help='Weight of pixel-wise L1 loss relative to adversarial loss. '
+                        'SPADE runs often use 10–20 (see run_spade_v2.sh).')
+    p.add_argument('--lambda_perceptual', type=float, default=0.0,
+                   help='Weight of VGG perceptual loss (typical SPADE: 10). 0 = off.')
     p.add_argument('--ngf',          type=int,   default=64,
                    help='Generator base filters. Halving to 32 cuts VRAM ~4× at a quality cost.')
     p.add_argument('--ndf',          type=int,   default=64)
@@ -98,6 +105,17 @@ def get_args():
                    help='Print [D_diag] through this many run-steps after resume (0=off). '
                         'Use ~4500 for a 2-epoch gan_v2_diag3 run.')
     return p.parse_args()
+
+
+def build_generator(args) -> nn.Module:
+    if args.generator == 'unet':
+        return UNetGenerator(in_ch=args.num_classes, ngf=args.ngf)
+    return SPADEGenerator(
+        label_nc=args.num_classes,
+        ngf=args.ngf,
+        img_h=args.img_h,
+        img_w=args.img_w,
+    )
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -300,8 +318,12 @@ def train(args):
     print(f'[*] AMP  : {"ON (FP16 forward + FP32 master weights)" if use_amp else "OFF"}')
 
     # ── Models ────────────────────────────────────────────────────────────────
-    G = UNetGenerator(in_ch=args.num_classes, ngf=args.ngf).to(device)
+    G = build_generator(args).to(device)
     D = PatchDiscriminator(in_ch=args.num_classes, ndf=args.ndf).to(device)
+    perceptual = None
+    if args.lambda_perceptual > 0:
+        perceptual = VGGPerceptualLoss().to(device)
+        print(f'[*] VGG perceptual loss weight: {args.lambda_perceptual}')
 
     n_G = sum(p.numel() for p in G.parameters() if p.requires_grad)
     n_D = sum(p.numel() for p in D.parameters() if p.requires_grad)
@@ -317,9 +339,12 @@ def train(args):
     # ── Resume ────────────────────────────────────────────────────────────────
     start_step, start_epoch = 0, 0
     if args.resume_g and os.path.isfile(args.resume_g):
-        start_step, start_epoch = load_checkpoint(
-            args.resume_g, G, opt_G, scaler_G, device)
-        print(f'[*] Resumed G from step {start_step}, epoch {start_epoch}')
+        if args.generator == 'spade':
+            print('[!] --resume_g ignored for SPADE (incompatible with U-Net checkpoints).')
+        else:
+            start_step, start_epoch = load_checkpoint(
+                args.resume_g, G, opt_G, scaler_G, device)
+            print(f'[*] Resumed G from step {start_step}, epoch {start_epoch}')
     if args.random_init_d:
         print('[*] Discriminator: random init (ignoring --resume_d)')
     elif args.resume_d and os.path.isfile(args.resume_d):
@@ -448,6 +473,15 @@ def train(args):
                     loss_G_l1    = F.l1_loss(fake_g, real_g) * args.lambda_l1
                     loss_G       = loss_G_adv + loss_G_l1
 
+                loss_G_perc = fake_g.new_zeros(())
+                if perceptual is not None:
+                    with autocast('cuda', enabled=False):
+                        loss_G_perc = (
+                            perceptual(fake_g.float(), real_g.float())
+                            * args.lambda_perceptual
+                        )
+                    loss_G = loss_G + loss_G_perc
+
                 opt_G.zero_grad(set_to_none=True)
                 scaler_G.scale(loss_G).backward()
                 scaler_G.step(opt_G)
@@ -467,10 +501,14 @@ def train(args):
                 # Healthy GAN: D in [0.1–0.4], G_adv in [0.5–1.5]
                 d_health = ('✓' if 0.05 < loss_D.item() < 0.5
                             else ('D_weak' if loss_D.item() < 0.05 else 'D_strong'))
+                perc_str = (
+                    f' perc={loss_G_perc.item():.4f}'
+                    if perceptual is not None else ''
+                )
                 print(
                     f'  [epoch {epoch+1:03d}] step {global_step:07d}  '
                     f'G={loss_G.item():.4f} '
-                    f'(adv={loss_G_adv.item():.4f} l1={loss_G_l1.item():.4f})  '
+                    f'(adv={loss_G_adv.item():.4f} l1={loss_G_l1.item():.4f}{perc_str})  '
                     f'D={loss_D.item():.4f}[{d_health}]  '
                     f'avg_G={avg_G:.4f}  avg_D={avg_D:.4f}  '
                     f'VRAM={mem_gb:.2f}GB  ({elapsed:.0f}s)'
@@ -511,7 +549,7 @@ if __name__ == '__main__':
     args = get_args()
 
     print('\n' + '='*70)
-    print('  Pix2Pix GAN — semantic labels → ground-view RGB  (configuration)')
+    print('  Stage 2 GAN — semantic labels → ground-view RGB  (configuration)')
     print('='*70)
     for k, v in vars(args).items():
         print(f'  {k:<22} {v}')

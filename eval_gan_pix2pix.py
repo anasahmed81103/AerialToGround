@@ -31,12 +31,29 @@ from gan_metrics import (
     lpips_sum,
     ssim_sum,
 )
-from gan_unet_model import UNetGenerator
-from train_gan_pix2pix import GANDataset
+from train_gan_pix2pix import GANDataset, build_generator
 
 
-def load_generator(ckpt_path: str, num_classes: int, ngf: int, device: torch.device):
-    G = UNetGenerator(in_ch=num_classes, ngf=ngf).to(device)
+def load_generator(
+    ckpt_path: str,
+    num_classes: int,
+    ngf: int,
+    device: torch.device,
+    *,
+    generator: str = 'unet',
+    img_h: int = 256,
+    img_w: int = 512,
+):
+    class _Args:
+        pass
+
+    a = _Args()
+    a.generator = generator
+    a.num_classes = num_classes
+    a.ngf = ngf
+    a.img_h = img_h
+    a.img_w = img_w
+    G = build_generator(a).to(device)
     ck = torch.load(ckpt_path, map_location=device, weights_only=False)
     G.load_state_dict(ck['model'])
     G.eval()
@@ -55,6 +72,7 @@ def main():
     p.add_argument('--img_h', type=int, default=256)
     p.add_argument('--img_w', type=int, default=512)
     p.add_argument('--ngf', type=int, default=64)
+    p.add_argument('--generator', choices=('unet', 'spade'), default='unet')
     p.add_argument('--skip_fid', action='store_true',
                    help='Skip FID (faster; use for tiny subsets).')
     p.add_argument('--skip_lpips', action='store_true')
@@ -64,7 +82,15 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'[*] device: {device}')
 
-    G, step = load_generator(args.gan_ckpt, args.num_classes, args.ngf, device)
+    G, step = load_generator(
+        args.gan_ckpt,
+        args.num_classes,
+        args.ngf,
+        device,
+        generator=args.generator,
+        img_h=args.img_h,
+        img_w=args.img_w,
+    )
     print(f'[*] generator step: {step}')
 
     ds = GANDataset(
