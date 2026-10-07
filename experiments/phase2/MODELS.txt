@@ -1,12 +1,17 @@
 Stage 1 (PolarLayoutNet) — gitignored weights (local only):
   experiments/phase2/runs/polar_full/best.pt
 
-Stage 2 (Pix2Pix v2 retrain) — large G/D pairs (gitignored):
-  experiments/phase2/gan_checkpoints/gan_v2_retrain/G_step0231066.pt
-  experiments/phase2/gan_checkpoints/gan_v2_retrain/D_step0231066.pt
+Stage 2 Pix2Pix — paper baseline (gitignored G/D):
+  experiments/phase2/runs/gan_v2_random_d/ckpts/G_step0231066.pt
+  experiments/phase2/runs/gan_v2_random_d/ckpts/D_step0231066.pt
+  (optional copy) experiments/phase2/gan_checkpoints/gan_v2_random_d/
 
-Optional local junction:
-  outputs/ckpts_gan_v2/  ->  experiments/phase2/gan_checkpoints/gan_v2_retrain/
+Stage 2 ablation — warm-started D collapse (negative result, same G step id):
+  experiments/phase2/runs/gan_v2_retrain/  (metrics in val_metrics_full.json; weights local/gitignored)
 
-Warm-start (v1 labels):
-  experiments/baseline/gan_checkpoints/  or  outputs/ckpts_gan/
+Warm-start generator (v1 labels, for all v2 GAN runs):
+  outputs/ckpts_gan/G_step0197766.pt
+
+Eval metrics (tracked):
+  experiments/phase2/runs/gan_v2_random_d/val_metrics_full.json
+  experiments/phase2/runs/gan_v2_retrain/val_metrics_full.json
