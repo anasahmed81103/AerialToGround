@@ -69,19 +69,44 @@ New modules: `phase2_class_weights.py`, `phase2_weighted_loss.py`. Launch: `expe
 
 ---
 
-## Stage 2 (Pix2Pix GAN) — next
+## Stage 2 (Pix2Pix GAN) — done (baseline locked)
 
 | Item | Choice |
 |------|--------|
 | Stage 1 layout for **paper / mIoU** | `polar_full/best.pt` (0.514) |
 | GAN **training** supervision | GT `labels_v2/ground/` + panos via `cvpr_train_v2.csv` |
 | GAN **demo / E2E** | `polar_full` predicted layouts at inference only |
-| Warm-start | `G_step0197766.pt` / `D_step0197766.pt` (v1 labels) |
-| Metrics | `eval_gan_pix2pix.py` — SSIM, LPIPS, FID on val |
-| Smoke (local) | `python smoke_gan_v2.py` |
-| Full retrain (RunPod) | `experiments/phase2/code/run_gan_v2_retrain.sh` |
+| G warm-start | `G_step0197766.pt` (v1 labels) |
+| **Paper Stage 2 ckpt** | **`gan_v2_random_d` → `G_step0231066.pt`** |
+| Metrics | `eval_gan_pix2pix.py` on full val (8,884) |
 
-Paper one-liner for class-weighted: inverse-frequency loss improves building IoU (+0.03) but lowers mIoU (−0.013); main Stage 1 result stays unweighted `polar_full`.
+### Results (GT layouts, same val set)
+
+| Run | Setup | SSIM | LPIPS | FID |
+|-----|--------|------|-------|-----|
+| `gan_v2_retrain` | Warm **G+D**, g_steps=2 | 0.516 | 0.618 | **164.4** |
+| **`gan_v2_random_d`** | **Random D**, g_steps=3, 15 ep | **0.516** | **0.610** | **157.6** |
+
+### Diagnostic chain (why warm-D retrain failed)
+
+1. **`gan_v2_diag` / `gan_v2_diag2`** — Warm D on v2: D≈0, adv≈1. **diag2 + `--no_amp` + `[D_diag]`:** real≈0.9, fake≈0.0 from step 1 → **AMP ruled out**; saturated warm D, not underflow.
+2. **`gan_v2_diag3`** — **`--random_init_d`**, g_steps=3, 2 epochs: real/fake start ~0.45/0.45, separate gradually → fix validated.
+3. **`gan_v2_random_d`** — Full 15-epoch RunPod train (AMP on): healthy early epochs, **D re-weakens later**; we **pick checkpoint by val FID** (228846 → FID 160.6; **231066 → FID 157.6**, kept).
+
+Logs: `logs/gan_v2_{retrain,diag,diag2,diag3,random_d}.txt`. Metrics JSON under `runs/gan_v2_*/`.
+
+### Reproduce
+
+```bash
+bash experiments/phase2/code/run_gan_v2_random_d.sh
+python eval_gan_pix2pix.py --gan_ckpt experiments/phase2/runs/gan_v2_random_d/ckpts/G_step0231066.pt \
+  --val_csv cvpr_val_v2.csv --batch_size 4 \
+  --out_json experiments/phase2/runs/gan_v2_random_d/val_metrics_full.json
+```
+
+**Next (Stage 2 upgrade):** SPADE — target FID below 157.6; carry random D, g_steps=3, lower λ_L1, perceptual loss.
+
+Paper one-liner for class-weighted (Stage 1): inverse-frequency loss improves building IoU (+0.03) but lowers mIoU (−0.013); main Stage 1 result stays unweighted `polar_full`.
 
 ## 4. Files
 

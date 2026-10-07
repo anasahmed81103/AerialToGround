@@ -1,5 +1,5 @@
 {
-  "note": "All Stage-1 numbers recorded for the research showcase. Do not overwrite. Next experiments go in a new folder (phase2, ...).",
+  "note": "Stage-1 numbers under phase2/ are locked. Stage-2 Pix2Pix rows under stage2_pix2pix/ — append SPADE here when ready.",
   "palette": {
     "0": "sky",
     "1": "vegetation",
@@ -346,6 +346,64 @@
         }
       }
     }
+  },
+  "stage2_pix2pix": {
+    "name": "Pix2Pix GAN — GT v2 semantic layout to ground RGB (256x512)",
+    "protocol": "cvpr_val_v2.csv, n=8884, GT labels_v2/ground/, metrics via eval_gan_pix2pix.py (SSIM, LPIPS, FID)",
+    "warm_start_g": "outputs/ckpts_gan/G_step0197766.pt",
+    "training_defaults": {
+      "lambda_l1": 100.0,
+      "batch_size": 16,
+      "lr": 0.0002,
+      "label_smooth": 0.9
+    },
+    "gan_v2_retrain": {
+      "run_dir": "experiments/phase2/runs/gan_v2_retrain/",
+      "resume": "G+D from v1 (197766), g_steps=2, AMP",
+      "finding": "Discriminator saturated (D~0, G_adv~1); L1-dominated v2 fine-tune, not healthy GAN",
+      "log": "logs/gan_v2_retrain.txt",
+      "val_full8884_v2": {
+        "source_file": "experiments/phase2/runs/gan_v2_retrain/val_metrics_full.json",
+        "generator_step": 231066,
+        "ssim": 0.5158942760998017,
+        "lpips": 0.6183079649928667,
+        "fid": 164.38776713683197
+      }
+    },
+    "gan_v2_random_d": {
+      "run_dir": "experiments/phase2/runs/gan_v2_random_d/",
+      "resume": "G from v1 only; random_init_d; g_steps=3; 15 epochs; AMP (RunPod)",
+      "finding": "Healthy early D (diag3 + first epochs); later D oscillation/collapse; checkpoint chosen by val FID not last step",
+      "log": "logs/gan_v2_random_d.txt",
+      "diagnostics": {
+        "gan_v2_diag": "logs/gan_v2_diag.txt",
+        "gan_v2_diag2": "logs/gan_v2_diag2.txt (no_amp, warm D, D_diag)",
+        "gan_v2_diag3": "logs/gan_v2_diag3.txt (random D, 2 ep)"
+      },
+      "checkpoint_selection": {
+        "G_step0231066": {
+          "ssim": 0.5155436318560592,
+          "lpips": 0.6099738975544869,
+          "fid": 157.57484579165592
+        },
+        "G_step0228846": {
+          "ssim": 0.5158851103814148,
+          "lpips": 0.6109527056547823,
+          "fid": 160.63563662840153,
+          "note": "mid-run; worse FID than final"
+        },
+        "selected": "G_step0231066"
+      },
+      "val_full8884_v2": {
+        "source_file": "experiments/phase2/runs/gan_v2_random_d/val_metrics_full.json",
+        "gan_ckpt": "experiments/phase2/runs/gan_v2_random_d/ckpts/G_step0231066.pt",
+        "generator_step": 231066,
+        "ssim": 0.5155436318560592,
+        "lpips": 0.6099738975544869,
+        "fid": 157.57484579165592
+      }
+    },
+    "stage2_best_for_paper": "gan_v2_random_d @ G_step0231066 (FID 157.6 vs warm-D retrain 164.4)"
   },
   "do_not_compare_directly": "Baseline 0.45 mIoU is on old SegNet labels (trees often labeled building). Phase 1 0.40 is on SegFormer labels. Fair comparison is the 0.30 vs 0.40 pair on v2 labels."
 }
