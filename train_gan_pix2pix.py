@@ -306,6 +306,7 @@ def save_visualisation(label: torch.Tensor, real: torch.Tensor,
 def train(args):
     # ── Device ────────────────────────────────────────────────────────────────
     if torch.cuda.is_available():
+        torch.backends.cudnn.benchmark = True
         device   = torch.device('cuda')
         gpu_name = torch.cuda.get_device_name(0)
         vram_gb  = torch.cuda.get_device_properties(0).total_memory / 1024**3
@@ -339,12 +340,15 @@ def train(args):
     # ── Resume ────────────────────────────────────────────────────────────────
     start_step, start_epoch = 0, 0
     if args.resume_g and os.path.isfile(args.resume_g):
-        if args.generator == 'spade':
-            print('[!] --resume_g ignored for SPADE (incompatible with U-Net checkpoints).')
-        else:
+        try:
             start_step, start_epoch = load_checkpoint(
                 args.resume_g, G, opt_G, scaler_G, device)
             print(f'[*] Resumed G from step {start_step}, epoch {start_epoch}')
+        except RuntimeError as e:
+            if args.generator == 'spade':
+                print('[!] --resume_g failed (use a SPADE G checkpoint, not U-Net):', e)
+            else:
+                raise
     if args.random_init_d:
         print('[*] Discriminator: random init (ignoring --resume_d)')
     elif args.resume_d and os.path.isfile(args.resume_d):
