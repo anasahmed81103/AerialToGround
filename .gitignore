@@ -63,6 +63,6 @@ desktop.ini
 # ──────────────────────────────
 #   demo/                  — sample aerial images for quickstart
 #   assets/                — README visual assets (comparison strips, etc.)
-#   experiments/           — code snapshots + metrics JSON/CSV/logs/showcase (not .pt or gan dump/)
+#   experiments/           — code snapshots + metrics JSON/CSV/logs/showcase + gan dump/ (~MB)
 #   cvpr_train.csv / cvpr_val.csv / cvpr_*_v2.csv — path lists only
 # ===========================================================================

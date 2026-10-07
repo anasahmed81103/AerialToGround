@@ -1,0 +1,474 @@
+nohup: ignoring input
+
+======================================================================
+  Pix2Pix GAN — semantic labels → ground-view RGB  (configuration)
+======================================================================
+  train_csv              cvpr_train_v2.csv
+  val_csv                cvpr_val_v2.csv
+  max_samples            None
+  batch_size             16
+  epochs                 15
+  lr                     0.0002
+  lambda_l1              100.0
+  ngf                    64
+  ndf                    64
+  num_classes            4
+  img_h                  256
+  img_w                  512
+  num_workers            4
+  ckpt_dir               experiments/phase2/runs/gan_v2_random_d/ckpts
+  dump_dir               experiments/phase2/runs/gan_v2_random_d/dump
+  log_every              100
+  vis_every              500
+  save_every             2000
+  resume_g               outputs/ckpts_gan/G_step0197766.pt
+  resume_d               
+  fresh_d_optimizer      False
+  random_init_d          True
+  g_steps                3
+  label_smooth           0.9
+  no_amp                 False
+  d_diag_max_steps       300
+======================================================================
+
+[*] GPU  : NVIDIA RTX PRO 4500 Blackwell  (31.4 GB VRAM)
+[*] AMP  : ON (FP16 forward + FP32 master weights)
+[*] Generator params    : 54.42 M
+[*] Discriminator params: 2.77 M
+[*] Resumed G from step 197766, epoch 38
+[*] Discriminator: random init (ignoring --resume_d)
+[*] Training samples : 35532
+[*] Batch size       : 16  (VRAM ≈ 18.6 GB est.)
+[*] G updates / D    : 3  (D label_smooth=0.9)
+[*] Steps per epoch  : 2220
+[*] Total steps      : 33300
+[*] Est. total time  : 11.1 h  (rough estimate; use --max_samples N to shorten)
+[*] Healthy training : D_loss in [0.05–0.50], G_adv in [0.5–1.5]
+
+  [D_diag run_step    1 global 0197767] grad_L2=2.375425e+01 (params_with_grad=13) amp=True real(mean/min/max)=0.046/-1.915/2.146 fake(mean/min/max)=0.048/-2.105/2.092
+  [D_diag run_step    2 global 0197768] grad_L2=inf (params_with_grad=13) amp=True real(mean/min/max)=0.603/-6.500/8.633 fake(mean/min/max)=0.591/-6.441/9.008
+  [D_diag run_step    3 global 0197769] grad_L2=inf (params_with_grad=13) amp=True real(mean/min/max)=0.613/-6.402/8.109 fake(mean/min/max)=0.605/-6.840/8.344
+  [D_diag run_step    4 global 0197770] grad_L2=1.763078e+02 (params_with_grad=13) amp=True real(mean/min/max)=0.641/-5.910/6.871 fake(mean/min/max)=0.635/-5.883/7.176
+  [D_diag run_step    5 global 0197771] grad_L2=3.030357e+01 (params_with_grad=13) amp=True real(mean/min/max)=0.583/-1.910/3.424 fake(mean/min/max)=0.578/-2.029/3.512
+  [D_diag run_step    6 global 0197772] grad_L2=1.677057e+01 (params_with_grad=13) amp=True real(mean/min/max)=0.553/-1.477/4.902 fake(mean/min/max)=0.545/-1.586/5.117
+  [D_diag run_step    7 global 0197773] grad_L2=2.240691e+01 (params_with_grad=13) amp=True real(mean/min/max)=0.474/-1.480/2.537 fake(mean/min/max)=0.473/-1.478/2.641
+  [D_diag run_step    8 global 0197774] grad_L2=7.728815e+00 (params_with_grad=13) amp=True real(mean/min/max)=0.437/-1.080/2.264 fake(mean/min/max)=0.434/-1.252/2.055
+  [D_diag run_step    9 global 0197775] grad_L2=1.135694e+01 (params_with_grad=13) amp=True real(mean/min/max)=0.425/-0.576/1.985 fake(mean/min/max)=0.419/-0.657/2.922
+  [D_diag run_step   10 global 0197776] grad_L2=1.003897e+01 (params_with_grad=13) amp=True real(mean/min/max)=0.405/-1.122/1.526 fake(mean/min/max)=0.399/-1.567/1.830
+  [epoch 039] step 0197800  G=21.0861 (adv=0.3380 l1=20.7481)  D=0.2043[✓]  avg_G=23.5737  avg_D=0.8428  VRAM=2.45GB  (7s)
+  [D_diag run_step   50 global 0197816] grad_L2=1.264561e+00 (params_with_grad=13) amp=True real(mean/min/max)=0.464/-0.926/1.215 fake(mean/min/max)=0.439/-1.102/1.518
+  [D_diag run_step  100 global 0197866] grad_L2=1.857627e+00 (params_with_grad=13) amp=True real(mean/min/max)=0.468/-0.334/1.171 fake(mean/min/max)=0.407/-0.365/1.271
+  [epoch 039] step 0197900  G=20.2014 (adv=0.4410 l1=19.7604)  D=0.2036[✓]  avg_G=21.9286  avg_D=0.3648  VRAM=2.45GB  (25s)
+  [D_diag run_step  150 global 0197916] grad_L2=1.640917e+00 (params_with_grad=13) amp=True real(mean/min/max)=0.523/-0.071/1.129 fake(mean/min/max)=0.419/-0.048/1.123
+  [D_diag run_step  200 global 0197966] grad_L2=1.148434e+01 (params_with_grad=13) amp=True real(mean/min/max)=0.495/-1.021/1.491 fake(mean/min/max)=0.321/-1.715/1.634
+  [epoch 039] step 0198000  G=20.7771 (adv=0.4356 l1=20.3415)  D=0.2491[✓]  avg_G=21.3659  avg_D=0.2900  VRAM=2.45GB  (43s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0198000
+  [D_diag run_step  250 global 0198016] grad_L2=5.774970e+00 (params_with_grad=13) amp=True real(mean/min/max)=0.572/-0.596/1.541 fake(mean/min/max)=0.362/-0.689/1.340
+  [D_diag run_step  300 global 0198066] grad_L2=9.765200e+00 (params_with_grad=13) amp=True real(mean/min/max)=0.759/-0.447/1.607 fake(mean/min/max)=0.460/-0.428/1.420
+  [epoch 039] step 0198100  G=20.0601 (adv=0.6834 l1=19.3767)  D=0.1551[✓]  avg_G=21.1554  avg_D=0.2487  VRAM=2.45GB  (62s)
+  [epoch 039] step 0198200  G=21.2387 (adv=0.8582 l1=20.3805)  D=0.0630[✓]  avg_G=20.9583  avg_D=0.2218  VRAM=2.45GB  (80s)
+  [epoch 039] step 0198300  G=19.0057 (adv=0.5179 l1=18.4877)  D=0.0644[✓]  avg_G=20.7705  avg_D=0.1955  VRAM=2.45GB  (98s)
+  [epoch 039] step 0198400  G=17.8932 (adv=0.6273 l1=17.2660)  D=0.0693[✓]  avg_G=20.6856  avg_D=0.1776  VRAM=2.45GB  (117s)
+  [epoch 039] step 0198500  G=18.6983 (adv=0.6608 l1=18.0376)  D=0.0456[D_weak]  avg_G=20.6447  avg_D=0.1636  VRAM=2.45GB  (135s)
+  [epoch 039] step 0198600  G=22.6590 (adv=0.9731 l1=21.6859)  D=0.0748[✓]  avg_G=20.5691  avg_D=0.1528  VRAM=2.45GB  (153s)
+  [epoch 039] step 0198700  G=18.9504 (adv=0.8220 l1=18.1284)  D=0.0418[D_weak]  avg_G=20.5317  avg_D=0.1445  VRAM=2.45GB  (171s)
+  [epoch 039] step 0198800  G=17.4961 (adv=0.5364 l1=16.9596)  D=0.0566[✓]  avg_G=20.5008  avg_D=0.1368  VRAM=2.45GB  (190s)
+  [epoch 039] step 0198900  G=22.2843 (adv=0.3297 l1=21.9545)  D=0.1965[✓]  avg_G=20.4816  avg_D=0.1622  VRAM=2.45GB  (208s)
+  [epoch 039] step 0199000  G=21.2913 (adv=0.5645 l1=20.7268)  D=0.1498[✓]  avg_G=20.4243  avg_D=0.1620  VRAM=2.45GB  (226s)
+  [epoch 039] step 0199100  G=20.5051 (adv=0.6938 l1=19.8113)  D=0.0549[✓]  avg_G=20.3917  avg_D=0.1564  VRAM=2.45GB  (245s)
+  [epoch 039] step 0199200  G=19.8694 (adv=0.7393 l1=19.1301)  D=0.0475[D_weak]  avg_G=20.3500  avg_D=0.1512  VRAM=2.45GB  (263s)
+  [epoch 039] step 0199300  G=21.3519 (adv=0.4800 l1=20.8719)  D=0.0908[✓]  avg_G=20.3284  avg_D=0.1462  VRAM=2.45GB  (281s)
+  [epoch 039] step 0199400  G=22.4358 (adv=0.6563 l1=21.7795)  D=0.0809[✓]  avg_G=20.3200  avg_D=0.1416  VRAM=2.45GB  (299s)
+  [epoch 039] step 0199500  G=19.5651 (adv=0.8539 l1=18.7112)  D=0.0421[D_weak]  avg_G=20.2943  avg_D=0.1375  VRAM=2.45GB  (318s)
+  [epoch 039] step 0199600  G=20.0894 (adv=0.9201 l1=19.1693)  D=0.0340[D_weak]  avg_G=20.2815  avg_D=0.1338  VRAM=2.45GB  (336s)
+  [epoch 039] step 0199700  G=20.5979 (adv=0.8098 l1=19.7880)  D=0.0657[✓]  avg_G=20.2796  avg_D=0.1305  VRAM=2.45GB  (354s)
+  [epoch 039] step 0199800  G=21.6772 (adv=0.8142 l1=20.8629)  D=0.0652[✓]  avg_G=20.2718  avg_D=0.1276  VRAM=2.45GB  (372s)
+  [epoch 039] step 0199900  G=18.5019 (adv=0.4773 l1=18.0246)  D=0.0480[D_weak]  avg_G=20.2550  avg_D=0.1244  VRAM=2.45GB  (391s)
+
+[epoch 039 done]  avg G=20.2554  avg D=0.1220  time=6.8 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0199986
+  [epoch 040] step 0200000  G=17.4413 (adv=0.3516 l1=17.0897)  D=0.1047[✓]  avg_G=18.4227  avg_D=0.0817  VRAM=2.45GB  (3s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0200000
+  [epoch 040] step 0200100  G=18.4261 (adv=0.5356 l1=17.8905)  D=0.0989[✓]  avg_G=18.4263  avg_D=0.1097  VRAM=2.45GB  (22s)
+  [epoch 040] step 0200200  G=16.7466 (adv=0.6586 l1=16.0880)  D=0.0771[✓]  avg_G=18.2876  avg_D=0.0874  VRAM=2.45GB  (41s)
+  [epoch 040] step 0200300  G=17.6509 (adv=0.4215 l1=17.2295)  D=0.1267[✓]  avg_G=18.2853  avg_D=0.0835  VRAM=2.45GB  (59s)
+  [epoch 040] step 0200400  G=18.0977 (adv=0.8410 l1=17.2567)  D=0.0749[✓]  avg_G=18.3680  avg_D=0.0799  VRAM=2.45GB  (78s)
+  [epoch 040] step 0200500  G=18.2339 (adv=0.7311 l1=17.5028)  D=0.0495[D_weak]  avg_G=18.4063  avg_D=0.0774  VRAM=2.45GB  (96s)
+  [epoch 040] step 0200600  G=17.1116 (adv=0.9006 l1=16.2110)  D=0.0496[D_weak]  avg_G=18.4062  avg_D=0.0758  VRAM=2.45GB  (114s)
+  [epoch 040] step 0200700  G=18.5099 (adv=1.1009 l1=17.4090)  D=0.0839[✓]  avg_G=18.3932  avg_D=0.0745  VRAM=2.45GB  (133s)
+  [epoch 040] step 0200800  G=19.5318 (adv=1.0858 l1=18.4461)  D=0.0414[D_weak]  avg_G=18.4143  avg_D=0.0732  VRAM=2.45GB  (151s)
+  [epoch 040] step 0200900  G=19.7978 (adv=0.9259 l1=18.8718)  D=0.0194[D_weak]  avg_G=18.4171  avg_D=0.0727  VRAM=2.45GB  (169s)
+  [epoch 040] step 0201000  G=17.4481 (adv=0.6004 l1=16.8478)  D=0.0716[✓]  avg_G=18.4363  avg_D=0.0714  VRAM=2.45GB  (187s)
+  [epoch 040] step 0201100  G=17.2715 (adv=0.7760 l1=16.4955)  D=0.0514[✓]  avg_G=18.4504  avg_D=0.0709  VRAM=2.45GB  (206s)
+  [epoch 040] step 0201200  G=19.5231 (adv=0.5283 l1=18.9948)  D=0.0815[✓]  avg_G=18.4463  avg_D=0.0705  VRAM=2.45GB  (224s)
+  [epoch 040] step 0201300  G=18.3967 (adv=0.8192 l1=17.5776)  D=0.0567[✓]  avg_G=18.4648  avg_D=0.0699  VRAM=2.45GB  (242s)
+  [epoch 040] step 0201400  G=17.9014 (adv=0.9635 l1=16.9379)  D=0.0436[D_weak]  avg_G=18.4584  avg_D=0.0691  VRAM=2.45GB  (261s)
+  [epoch 040] step 0201500  G=16.8237 (adv=0.4430 l1=16.3807)  D=0.0898[✓]  avg_G=18.4610  avg_D=0.0685  VRAM=2.45GB  (279s)
+  [epoch 040] step 0201600  G=17.4938 (adv=1.1145 l1=16.3793)  D=0.1644[✓]  avg_G=18.4547  avg_D=0.0683  VRAM=2.45GB  (298s)
+  [epoch 040] step 0201700  G=18.9596 (adv=0.7440 l1=18.2156)  D=0.0462[D_weak]  avg_G=18.4573  avg_D=0.0673  VRAM=2.45GB  (316s)
+  [epoch 040] step 0201800  G=17.3571 (adv=0.7243 l1=16.6329)  D=0.0509[✓]  avg_G=18.4595  avg_D=0.0667  VRAM=2.45GB  (335s)
+  [epoch 040] step 0201900  G=19.3464 (adv=1.0192 l1=18.3272)  D=0.0561[✓]  avg_G=18.4588  avg_D=0.0658  VRAM=2.45GB  (353s)
+  [epoch 040] step 0202000  G=17.8902 (adv=0.7968 l1=17.0934)  D=0.0408[D_weak]  avg_G=18.4589  avg_D=0.0648  VRAM=2.45GB  (372s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0202000
+  [epoch 040] step 0202100  G=18.5738 (adv=0.7780 l1=17.7958)  D=0.0524[✓]  avg_G=18.4359  avg_D=0.0675  VRAM=2.45GB  (391s)
+  [epoch 040] step 0202200  G=17.0459 (adv=0.6600 l1=16.3859)  D=0.0583[✓]  avg_G=18.4272  avg_D=0.0665  VRAM=2.45GB  (410s)
+
+[epoch 040 done]  avg G=18.4276  avg D=0.0664  time=6.8 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0202206
+  [epoch 041] step 0202300  G=16.0061 (adv=0.7903 l1=15.2158)  D=0.0260[D_weak]  avg_G=17.2622  avg_D=0.0417  VRAM=2.45GB  (18s)
+  [epoch 041] step 0202400  G=17.3388 (adv=0.8820 l1=16.4568)  D=0.0142[D_weak]  avg_G=17.2444  avg_D=0.0395  VRAM=2.45GB  (36s)
+  [epoch 041] step 0202500  G=16.8272 (adv=0.8343 l1=15.9929)  D=0.0193[D_weak]  avg_G=17.1313  avg_D=0.0394  VRAM=2.45GB  (54s)
+  [epoch 041] step 0202600  G=16.4623 (adv=1.0595 l1=15.4028)  D=0.0372[D_weak]  avg_G=17.1038  avg_D=0.0385  VRAM=2.45GB  (73s)
+  [epoch 041] step 0202700  G=17.2245 (adv=0.9983 l1=16.2262)  D=0.0157[D_weak]  avg_G=17.0472  avg_D=0.0373  VRAM=2.45GB  (91s)
+  [epoch 041] step 0202800  G=16.0083 (adv=0.8767 l1=15.1316)  D=0.0270[D_weak]  avg_G=17.0303  avg_D=0.0361  VRAM=2.45GB  (110s)
+  [epoch 041] step 0202900  G=18.5455 (adv=1.0289 l1=17.5166)  D=0.0075[D_weak]  avg_G=17.0232  avg_D=0.0348  VRAM=2.45GB  (128s)
+  [epoch 041] step 0203000  G=18.9029 (adv=0.9863 l1=17.9165)  D=0.0081[D_weak]  avg_G=17.0003  avg_D=0.0336  VRAM=2.45GB  (150s)
+  [epoch 041] step 0203100  G=16.4526 (adv=0.7036 l1=15.7490)  D=0.0387[D_weak]  avg_G=16.9909  avg_D=0.0324  VRAM=2.45GB  (174s)
+  [epoch 041] step 0203200  G=16.5127 (adv=0.9261 l1=15.5866)  D=0.0243[D_weak]  avg_G=16.9735  avg_D=0.0311  VRAM=2.45GB  (197s)
+  [epoch 041] step 0203300  G=17.3370 (adv=1.0139 l1=16.3231)  D=0.0074[D_weak]  avg_G=16.9749  avg_D=0.0297  VRAM=2.45GB  (217s)
+  [epoch 041] step 0203400  G=16.3517 (adv=0.8549 l1=15.4968)  D=0.0222[D_weak]  avg_G=16.9667  avg_D=0.0289  VRAM=2.45GB  (235s)
+  [epoch 041] step 0203500  G=14.9731 (adv=0.9851 l1=13.9880)  D=0.0047[D_weak]  avg_G=16.9486  avg_D=0.0283  VRAM=2.45GB  (254s)
+  [epoch 041] step 0203600  G=17.0228 (adv=1.0052 l1=16.0176)  D=0.0029[D_weak]  avg_G=16.9446  avg_D=0.0271  VRAM=2.45GB  (272s)
+  [epoch 041] step 0203700  G=16.7026 (adv=1.0224 l1=15.6802)  D=0.0038[D_weak]  avg_G=16.9396  avg_D=0.0258  VRAM=2.45GB  (290s)
+  [epoch 041] step 0203800  G=16.4692 (adv=0.9925 l1=15.4767)  D=0.0043[D_weak]  avg_G=16.9285  avg_D=0.0248  VRAM=2.45GB  (309s)
+  [epoch 041] step 0203900  G=16.9145 (adv=1.0155 l1=15.8991)  D=0.0022[D_weak]  avg_G=16.9158  avg_D=0.0236  VRAM=2.45GB  (327s)
+  [epoch 041] step 0204000  G=18.3326 (adv=0.9908 l1=17.3419)  D=0.0020[D_weak]  avg_G=16.9138  avg_D=0.0225  VRAM=2.45GB  (345s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0204000
+  [epoch 041] step 0204100  G=16.1842 (adv=0.9486 l1=15.2357)  D=0.0017[D_weak]  avg_G=16.8970  avg_D=0.0215  VRAM=2.45GB  (365s)
+  [epoch 041] step 0204200  G=18.7614 (adv=0.9959 l1=17.7655)  D=0.0090[D_weak]  avg_G=16.8785  avg_D=0.0205  VRAM=2.45GB  (383s)
+  [epoch 041] step 0204300  G=16.7993 (adv=0.9639 l1=15.8353)  D=0.0012[D_weak]  avg_G=16.8762  avg_D=0.0196  VRAM=2.45GB  (402s)
+  [epoch 041] step 0204400  G=15.7483 (adv=0.9933 l1=14.7550)  D=0.0036[D_weak]  avg_G=16.8711  avg_D=0.0188  VRAM=2.45GB  (420s)
+
+[epoch 041 done]  avg G=16.8685  avg D=0.0186  time=7.1 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0204426
+  [epoch 042] step 0204500  G=16.8678 (adv=0.9878 l1=15.8800)  D=0.0014[D_weak]  avg_G=16.0881  avg_D=0.0027  VRAM=2.45GB  (15s)
+  [epoch 042] step 0204600  G=16.1721 (adv=1.0086 l1=15.1634)  D=0.0009[D_weak]  avg_G=15.9507  avg_D=0.0024  VRAM=2.45GB  (33s)
+  [epoch 042] step 0204700  G=17.3075 (adv=0.9988 l1=16.3087)  D=0.0015[D_weak]  avg_G=15.9298  avg_D=0.0024  VRAM=2.45GB  (52s)
+  [epoch 042] step 0204800  G=15.6812 (adv=1.0429 l1=14.6383)  D=0.0077[D_weak]  avg_G=15.9044  avg_D=0.0028  VRAM=2.45GB  (70s)
+  [epoch 042] step 0204900  G=14.8077 (adv=0.9769 l1=13.8308)  D=0.0052[D_weak]  avg_G=15.9093  avg_D=0.0025  VRAM=2.45GB  (88s)
+  [epoch 042] step 0205000  G=16.4024 (adv=0.9557 l1=15.4467)  D=0.0064[D_weak]  avg_G=15.9110  avg_D=0.0024  VRAM=2.45GB  (107s)
+  [epoch 042] step 0205100  G=15.7334 (adv=1.0068 l1=14.7266)  D=0.0006[D_weak]  avg_G=15.9266  avg_D=0.0023  VRAM=2.45GB  (125s)
+  [epoch 042] step 0205200  G=17.5512 (adv=1.0041 l1=16.5471)  D=0.0018[D_weak]  avg_G=15.9201  avg_D=0.0024  VRAM=2.45GB  (143s)
+  [epoch 042] step 0205300  G=15.5602 (adv=1.0227 l1=14.5375)  D=0.0012[D_weak]  avg_G=15.9026  avg_D=0.0022  VRAM=2.45GB  (161s)
+  [epoch 042] step 0205400  G=15.8187 (adv=0.3269 l1=15.4918)  D=0.2063[✓]  avg_G=15.9235  avg_D=0.0799  VRAM=2.45GB  (180s)
+  [epoch 042] step 0205500  G=15.0968 (adv=0.3182 l1=14.7786)  D=0.1997[✓]  avg_G=15.8347  avg_D=0.0913  VRAM=2.45GB  (198s)
+  [epoch 042] step 0205600  G=14.6191 (adv=0.3178 l1=14.3013)  D=0.1888[✓]  avg_G=15.7672  avg_D=0.1001  VRAM=2.45GB  (216s)
+  [epoch 042] step 0205700  G=13.4323 (adv=0.4362 l1=12.9961)  D=0.1375[✓]  avg_G=15.7299  avg_D=0.1052  VRAM=2.45GB  (235s)
+  [epoch 042] step 0205800  G=15.6938 (adv=0.6580 l1=15.0358)  D=0.1172[✓]  avg_G=15.7135  avg_D=0.1057  VRAM=2.45GB  (253s)
+  [epoch 042] step 0205900  G=17.0788 (adv=0.4244 l1=16.6544)  D=0.1232[✓]  avg_G=15.7181  avg_D=0.1060  VRAM=2.45GB  (272s)
+  [epoch 042] step 0206000  G=15.4420 (adv=0.4327 l1=15.0092)  D=0.1257[✓]  avg_G=15.7319  avg_D=0.1060  VRAM=2.45GB  (290s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0206000
+  [epoch 042] step 0206100  G=16.4851 (adv=0.7208 l1=15.7642)  D=0.1013[✓]  avg_G=15.7439  avg_D=0.1057  VRAM=2.45GB  (309s)
+  [epoch 042] step 0206200  G=17.1287 (adv=0.6854 l1=16.4434)  D=0.0791[✓]  avg_G=15.7700  avg_D=0.1051  VRAM=2.45GB  (328s)
+  [epoch 042] step 0206300  G=16.2654 (adv=0.8062 l1=15.4592)  D=0.0650[✓]  avg_G=15.7881  avg_D=0.1042  VRAM=2.45GB  (346s)
+  [epoch 042] step 0206400  G=15.4069 (adv=0.7960 l1=14.6109)  D=0.0842[✓]  avg_G=15.8163  avg_D=0.1032  VRAM=2.45GB  (364s)
+  [epoch 042] step 0206500  G=15.7185 (adv=0.4732 l1=15.2453)  D=0.0807[✓]  avg_G=15.8316  avg_D=0.1021  VRAM=2.45GB  (383s)
+  [epoch 042] step 0206600  G=16.4170 (adv=0.7182 l1=15.6987)  D=0.0480[D_weak]  avg_G=15.8434  avg_D=0.1006  VRAM=2.45GB  (403s)
+
+[epoch 042 done]  avg G=15.8533  avg D=0.0999  time=6.9 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0206646
+  [epoch 043] step 0206700  G=14.4317 (adv=0.9767 l1=13.4550)  D=0.0590[✓]  avg_G=15.8155  avg_D=0.0618  VRAM=2.45GB  (11s)
+  [epoch 043] step 0206800  G=16.9883 (adv=0.9377 l1=16.0506)  D=0.0252[D_weak]  avg_G=15.8128  avg_D=0.0593  VRAM=2.45GB  (29s)
+  [epoch 043] step 0206900  G=15.4058 (adv=0.6985 l1=14.7072)  D=0.0449[D_weak]  avg_G=15.6634  avg_D=0.0582  VRAM=2.45GB  (47s)
+  [epoch 043] step 0207000  G=16.9761 (adv=1.0037 l1=15.9724)  D=0.0284[D_weak]  avg_G=15.6793  avg_D=0.0570  VRAM=2.45GB  (65s)
+  [epoch 043] step 0207100  G=15.5936 (adv=1.0808 l1=14.5129)  D=0.0467[D_weak]  avg_G=15.6671  avg_D=0.0555  VRAM=2.45GB  (84s)
+  [epoch 043] step 0207200  G=14.6294 (adv=0.8439 l1=13.7855)  D=0.0248[D_weak]  avg_G=15.6581  avg_D=0.0513  VRAM=2.45GB  (106s)
+  [epoch 043] step 0207300  G=15.4498 (adv=0.9677 l1=14.4822)  D=0.0326[D_weak]  avg_G=15.6296  avg_D=0.0486  VRAM=2.45GB  (124s)
+  [epoch 043] step 0207400  G=15.3307 (adv=1.0298 l1=14.3008)  D=0.0187[D_weak]  avg_G=15.6060  avg_D=0.0463  VRAM=2.45GB  (143s)
+  [epoch 043] step 0207500  G=14.0484 (adv=0.7566 l1=13.2918)  D=0.0272[D_weak]  avg_G=15.5637  avg_D=0.0444  VRAM=2.45GB  (163s)
+  [epoch 043] step 0207600  G=14.7087 (adv=0.7269 l1=13.9818)  D=0.0344[D_weak]  avg_G=15.5550  avg_D=0.0425  VRAM=2.45GB  (181s)
+  [epoch 043] step 0207700  G=14.5015 (adv=0.9481 l1=13.5535)  D=0.0049[D_weak]  avg_G=15.5395  avg_D=0.0402  VRAM=2.45GB  (199s)
+  [epoch 043] step 0207800  G=13.8933 (adv=0.9217 l1=12.9716)  D=0.0296[D_weak]  avg_G=15.5249  avg_D=0.0389  VRAM=2.45GB  (226s)
+  [epoch 043] step 0207900  G=13.9845 (adv=1.0664 l1=12.9180)  D=0.0363[D_weak]  avg_G=15.5076  avg_D=0.0373  VRAM=2.45GB  (245s)
+  [epoch 043] step 0208000  G=16.7535 (adv=1.0184 l1=15.7350)  D=0.0126[D_weak]  avg_G=15.4923  avg_D=0.0359  VRAM=2.45GB  (264s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0208000
+  [epoch 043] step 0208100  G=13.9320 (adv=1.0205 l1=12.9115)  D=0.0022[D_weak]  avg_G=15.4923  avg_D=0.0340  VRAM=2.45GB  (285s)
+  [epoch 043] step 0208200  G=15.0812 (adv=0.9994 l1=14.0818)  D=0.0010[D_weak]  avg_G=15.4808  avg_D=0.0321  VRAM=2.45GB  (305s)
+  [epoch 043] step 0208300  G=14.4993 (adv=0.9825 l1=13.5168)  D=0.0011[D_weak]  avg_G=15.4965  avg_D=0.0303  VRAM=2.45GB  (324s)
+  [epoch 043] step 0208400  G=16.1841 (adv=0.9838 l1=15.2002)  D=0.0040[D_weak]  avg_G=15.4808  avg_D=0.0288  VRAM=2.45GB  (342s)
+  [epoch 043] step 0208500  G=16.4254 (adv=1.0011 l1=15.4243)  D=0.0054[D_weak]  avg_G=15.4791  avg_D=0.0274  VRAM=2.45GB  (360s)
+  [epoch 043] step 0208600  G=13.8757 (adv=0.9848 l1=12.8908)  D=0.0039[D_weak]  avg_G=15.4632  avg_D=0.0262  VRAM=2.45GB  (379s)
+  [epoch 043] step 0208700  G=15.7187 (adv=1.0029 l1=14.7158)  D=0.0012[D_weak]  avg_G=15.4659  avg_D=0.0251  VRAM=2.45GB  (397s)
+  [epoch 043] step 0208800  G=15.5181 (adv=0.9981 l1=14.5200)  D=0.0028[D_weak]  avg_G=15.4611  avg_D=0.0240  VRAM=2.45GB  (415s)
+
+[epoch 043 done]  avg G=15.4650  avg D=0.0234  time=7.1 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0208866
+  [epoch 044] step 0208900  G=13.6655 (adv=0.9880 l1=12.6775)  D=0.0039[D_weak]  avg_G=14.6846  avg_D=0.0028  VRAM=2.45GB  (7s)
+  [epoch 044] step 0209000  G=14.5932 (adv=1.0082 l1=13.5850)  D=0.0028[D_weak]  avg_G=14.6984  avg_D=0.0034  VRAM=2.45GB  (26s)
+  [epoch 044] step 0209100  G=14.7631 (adv=1.0103 l1=13.7528)  D=0.0020[D_weak]  avg_G=14.7623  avg_D=0.0033  VRAM=2.45GB  (46s)
+  [epoch 044] step 0209200  G=16.5938 (adv=0.9978 l1=15.5960)  D=0.0009[D_weak]  avg_G=14.8106  avg_D=0.0030  VRAM=2.45GB  (65s)
+  [epoch 044] step 0209300  G=15.4236 (adv=0.9993 l1=14.4243)  D=0.0058[D_weak]  avg_G=14.8298  avg_D=0.0032  VRAM=2.45GB  (85s)
+  [epoch 044] step 0209400  G=14.2930 (adv=1.0110 l1=13.2820)  D=0.0009[D_weak]  avg_G=14.8584  avg_D=0.0031  VRAM=2.45GB  (104s)
+  [epoch 044] step 0209500  G=14.0162 (adv=1.0032 l1=13.0130)  D=0.0017[D_weak]  avg_G=14.8772  avg_D=0.0029  VRAM=2.45GB  (123s)
+  [epoch 044] step 0209600  G=14.8551 (adv=1.0034 l1=13.8517)  D=0.0009[D_weak]  avg_G=14.8910  avg_D=0.0029  VRAM=2.45GB  (143s)
+  [epoch 044] step 0209700  G=14.5665 (adv=0.3517 l1=14.2149)  D=0.1639[✓]  avg_G=14.8788  avg_D=0.0544  VRAM=2.45GB  (163s)
+  [epoch 044] step 0209800  G=14.3101 (adv=0.5003 l1=13.8098)  D=0.0609[✓]  avg_G=14.8548  avg_D=0.0590  VRAM=2.45GB  (183s)
+  [epoch 044] step 0209900  G=13.4799 (adv=0.3724 l1=13.1075)  D=0.0931[✓]  avg_G=14.8751  avg_D=0.0606  VRAM=2.45GB  (203s)
+  [epoch 044] step 0210000  G=14.9302 (adv=0.7673 l1=14.1629)  D=0.0389[D_weak]  avg_G=14.8839  avg_D=0.0615  VRAM=2.45GB  (223s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0210000
+  [epoch 044] step 0210100  G=14.1872 (adv=0.6790 l1=13.5083)  D=0.0862[✓]  avg_G=14.9155  avg_D=0.0609  VRAM=2.45GB  (243s)
+  [epoch 044] step 0210200  G=15.4654 (adv=0.9332 l1=14.5322)  D=0.0222[D_weak]  avg_G=14.9260  avg_D=0.0598  VRAM=2.45GB  (261s)
+  [epoch 044] step 0210300  G=13.8458 (adv=0.9744 l1=12.8714)  D=0.1143[✓]  avg_G=14.9455  avg_D=0.0579  VRAM=2.45GB  (280s)
+  [epoch 044] step 0210400  G=14.7875 (adv=0.9719 l1=13.8156)  D=0.0246[D_weak]  avg_G=14.9458  avg_D=0.0562  VRAM=2.45GB  (298s)
+  [epoch 044] step 0210500  G=16.2675 (adv=0.7843 l1=15.4831)  D=0.0501[✓]  avg_G=14.9538  avg_D=0.0545  VRAM=2.45GB  (317s)
+  [epoch 044] step 0210600  G=15.5142 (adv=1.0321 l1=14.4821)  D=0.0244[D_weak]  avg_G=14.9540  avg_D=0.0528  VRAM=2.45GB  (335s)
+  [epoch 044] step 0210700  G=14.3946 (adv=0.8453 l1=13.5494)  D=0.0342[D_weak]  avg_G=14.9633  avg_D=0.0513  VRAM=2.45GB  (354s)
+  [epoch 044] step 0210800  G=14.0478 (adv=0.8874 l1=13.1605)  D=0.0284[D_weak]  avg_G=14.9587  avg_D=0.0495  VRAM=2.45GB  (373s)
+  [epoch 044] step 0210900  G=14.9977 (adv=1.0111 l1=13.9866)  D=0.0048[D_weak]  avg_G=14.9609  avg_D=0.0474  VRAM=2.45GB  (391s)
+  [epoch 044] step 0211000  G=14.5537 (adv=0.9812 l1=13.5725)  D=0.0013[D_weak]  avg_G=14.9606  avg_D=0.0454  VRAM=2.45GB  (411s)
+
+[epoch 044 done]  avg G=14.9616  avg D=0.0438  time=7.1 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0211086
+  [epoch 045] step 0211100  G=15.5636 (adv=0.9861 l1=14.5775)  D=0.0030[D_weak]  avg_G=14.6468  avg_D=0.0026  VRAM=2.45GB  (3s)
+  [epoch 045] step 0211200  G=14.8734 (adv=0.9728 l1=13.9007)  D=0.0018[D_weak]  avg_G=14.5282  avg_D=0.0029  VRAM=2.45GB  (22s)
+  [epoch 045] step 0211300  G=14.9218 (adv=1.0029 l1=13.9189)  D=0.0007[D_weak]  avg_G=14.4520  avg_D=0.0025  VRAM=2.45GB  (40s)
+  [epoch 045] step 0211400  G=13.7565 (adv=0.9939 l1=12.7626)  D=0.0012[D_weak]  avg_G=14.4807  avg_D=0.0028  VRAM=2.45GB  (59s)
+  [epoch 045] step 0211500  G=14.6928 (adv=1.0045 l1=13.6883)  D=0.0009[D_weak]  avg_G=14.4644  avg_D=0.0029  VRAM=2.45GB  (79s)
+  [epoch 045] step 0211600  G=14.4233 (adv=0.9981 l1=13.4252)  D=0.0008[D_weak]  avg_G=14.5028  avg_D=0.0026  VRAM=2.45GB  (97s)
+  [epoch 045] step 0211700  G=15.7148 (adv=1.0159 l1=14.6988)  D=0.0009[D_weak]  avg_G=14.5196  avg_D=0.0026  VRAM=2.45GB  (115s)
+  [epoch 045] step 0211800  G=14.9425 (adv=1.0002 l1=13.9423)  D=0.0009[D_weak]  avg_G=14.5247  avg_D=0.0025  VRAM=2.45GB  (134s)
+  [epoch 045] step 0211900  G=14.4657 (adv=0.9917 l1=13.4740)  D=0.0014[D_weak]  avg_G=14.5225  avg_D=0.0025  VRAM=2.45GB  (152s)
+  [epoch 045] step 0212000  G=14.1812 (adv=0.9980 l1=13.1832)  D=0.0040[D_weak]  avg_G=14.5312  avg_D=0.0025  VRAM=2.45GB  (171s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0212000
+  [epoch 045] step 0212100  G=14.4581 (adv=1.0165 l1=13.4415)  D=0.0062[D_weak]  avg_G=14.5239  avg_D=0.0027  VRAM=2.45GB  (190s)
+  [epoch 045] step 0212200  G=16.3056 (adv=1.0002 l1=15.3054)  D=0.0008[D_weak]  avg_G=14.5307  avg_D=0.0026  VRAM=2.45GB  (209s)
+  [epoch 045] step 0212300  G=17.0144 (adv=1.0003 l1=16.0141)  D=0.0005[D_weak]  avg_G=14.5328  avg_D=0.0026  VRAM=2.45GB  (227s)
+  [epoch 045] step 0212400  G=14.8128 (adv=1.0020 l1=13.8108)  D=0.0004[D_weak]  avg_G=14.5366  avg_D=0.0026  VRAM=2.45GB  (246s)
+  [epoch 045] step 0212500  G=14.0389 (adv=1.0015 l1=13.0373)  D=0.0007[D_weak]  avg_G=14.5430  avg_D=0.0025  VRAM=2.45GB  (264s)
+  [epoch 045] step 0212600  G=16.0914 (adv=0.9995 l1=15.0919)  D=0.0020[D_weak]  avg_G=14.5544  avg_D=0.0025  VRAM=2.45GB  (283s)
+  [epoch 045] step 0212700  G=14.6682 (adv=0.9973 l1=13.6709)  D=0.0013[D_weak]  avg_G=14.5617  avg_D=0.0024  VRAM=2.45GB  (301s)
+  [epoch 045] step 0212800  G=15.9112 (adv=1.0023 l1=14.9089)  D=0.0006[D_weak]  avg_G=14.5644  avg_D=0.0024  VRAM=2.45GB  (320s)
+  [epoch 045] step 0212900  G=13.4591 (adv=0.9928 l1=12.4663)  D=0.0014[D_weak]  avg_G=14.5645  avg_D=0.0024  VRAM=2.45GB  (339s)
+  [epoch 045] step 0213000  G=14.8989 (adv=0.9980 l1=13.9009)  D=0.0004[D_weak]  avg_G=14.5661  avg_D=0.0024  VRAM=2.45GB  (357s)
+  [epoch 045] step 0213100  G=13.1168 (adv=0.9957 l1=12.1210)  D=0.0005[D_weak]  avg_G=14.5767  avg_D=0.0024  VRAM=2.45GB  (375s)
+  [epoch 045] step 0213200  G=15.9750 (adv=0.9903 l1=14.9846)  D=0.0004[D_weak]  avg_G=14.5813  avg_D=0.0023  VRAM=2.45GB  (394s)
+  [epoch 045] step 0213300  G=13.9038 (adv=0.9997 l1=12.9041)  D=0.0011[D_weak]  avg_G=14.5790  avg_D=0.0023  VRAM=2.45GB  (412s)
+
+[epoch 045 done]  avg G=14.5812  avg D=0.0023  time=6.9 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0213306
+  [epoch 046] step 0213400  G=12.9974 (adv=1.0017 l1=11.9957)  D=0.0005[D_weak]  avg_G=14.3883  avg_D=0.0013  VRAM=2.45GB  (18s)
+  [epoch 046] step 0213500  G=14.0220 (adv=0.9846 l1=13.0374)  D=0.0008[D_weak]  avg_G=14.2627  avg_D=0.0018  VRAM=2.45GB  (36s)
+  [epoch 046] step 0213600  G=13.7760 (adv=0.9783 l1=12.7978)  D=0.0038[D_weak]  avg_G=14.3072  avg_D=0.0015  VRAM=2.45GB  (55s)
+  [epoch 046] step 0213700  G=13.5633 (adv=0.9954 l1=12.5678)  D=0.0004[D_weak]  avg_G=14.2499  avg_D=0.0015  VRAM=2.45GB  (75s)
+  [epoch 046] step 0213800  G=12.9107 (adv=1.0034 l1=11.9073)  D=0.0008[D_weak]  avg_G=14.2477  avg_D=0.0014  VRAM=2.45GB  (95s)
+  [epoch 046] step 0213900  G=14.3115 (adv=0.9986 l1=13.3129)  D=0.0013[D_weak]  avg_G=14.2411  avg_D=0.0014  VRAM=2.45GB  (115s)
+  [epoch 046] step 0214000  G=14.4771 (adv=0.9993 l1=13.4778)  D=0.0006[D_weak]  avg_G=14.2437  avg_D=0.0014  VRAM=2.45GB  (134s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0214000
+  [epoch 046] step 0214100  G=15.9703 (adv=0.9786 l1=14.9917)  D=0.0088[D_weak]  avg_G=14.2458  avg_D=0.0015  VRAM=2.45GB  (154s)
+  [epoch 046] step 0214200  G=13.8846 (adv=1.0001 l1=12.8845)  D=0.0006[D_weak]  avg_G=14.2602  avg_D=0.0014  VRAM=2.45GB  (173s)
+  [epoch 046] step 0214300  G=14.8570 (adv=1.0130 l1=13.8440)  D=0.0025[D_weak]  avg_G=14.2621  avg_D=0.0014  VRAM=2.45GB  (191s)
+  [epoch 046] step 0214400  G=14.0986 (adv=0.9918 l1=13.1068)  D=0.0010[D_weak]  avg_G=14.2674  avg_D=0.0013  VRAM=2.45GB  (209s)
+  [epoch 046] step 0214500  G=14.1531 (adv=0.9848 l1=13.1683)  D=0.0019[D_weak]  avg_G=14.2736  avg_D=0.0015  VRAM=2.45GB  (228s)
+  [epoch 046] step 0214600  G=15.7991 (adv=1.0031 l1=14.7961)  D=0.0003[D_weak]  avg_G=14.2705  avg_D=0.0014  VRAM=2.45GB  (246s)
+  [epoch 046] step 0214700  G=13.0157 (adv=0.3425 l1=12.6732)  D=0.1881[✓]  avg_G=14.2831  avg_D=0.0486  VRAM=2.45GB  (265s)
+  [epoch 046] step 0214800  G=14.8405 (adv=0.7318 l1=14.1087)  D=0.0401[D_weak]  avg_G=14.2590  avg_D=0.0528  VRAM=2.45GB  (283s)
+  [epoch 046] step 0214900  G=13.6052 (adv=0.7031 l1=12.9020)  D=0.0637[✓]  avg_G=14.2670  avg_D=0.0537  VRAM=2.45GB  (302s)
+  [epoch 046] step 0215000  G=13.4029 (adv=0.7254 l1=12.6775)  D=0.0880[✓]  avg_G=14.2760  avg_D=0.0538  VRAM=2.45GB  (321s)
+  [epoch 046] step 0215100  G=14.6555 (adv=0.7530 l1=13.9025)  D=0.0625[✓]  avg_G=14.2708  avg_D=0.0537  VRAM=2.45GB  (339s)
+  [epoch 046] step 0215200  G=15.0436 (adv=0.9172 l1=14.1264)  D=0.0160[D_weak]  avg_G=14.2849  avg_D=0.0525  VRAM=2.45GB  (357s)
+  [epoch 046] step 0215300  G=15.6128 (adv=0.9334 l1=14.6795)  D=0.0126[D_weak]  avg_G=14.2969  avg_D=0.0512  VRAM=2.45GB  (376s)
+  [epoch 046] step 0215400  G=13.4768 (adv=0.8709 l1=12.6059)  D=0.0517[✓]  avg_G=14.3052  avg_D=0.0498  VRAM=2.45GB  (394s)
+  [epoch 046] step 0215500  G=13.7950 (adv=0.9089 l1=12.8860)  D=0.0154[D_weak]  avg_G=14.3081  avg_D=0.0484  VRAM=2.45GB  (413s)
+
+[epoch 046 done]  avg G=14.3080  avg D=0.0481  time=7.0 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0215526
+  [epoch 047] step 0215600  G=14.6437 (adv=0.9461 l1=13.6975)  D=0.0252[D_weak]  avg_G=14.0282  avg_D=0.0164  VRAM=2.45GB  (16s)
+  [epoch 047] step 0215700  G=12.5183 (adv=0.9141 l1=11.6043)  D=0.0187[D_weak]  avg_G=14.0530  avg_D=0.0165  VRAM=2.45GB  (35s)
+  [epoch 047] step 0215800  G=15.7999 (adv=1.0219 l1=14.7780)  D=0.0091[D_weak]  avg_G=14.1047  avg_D=0.0156  VRAM=2.45GB  (54s)
+  [epoch 047] step 0215900  G=14.4932 (adv=0.9008 l1=13.5924)  D=0.0480[D_weak]  avg_G=14.0949  avg_D=0.0144  VRAM=2.45GB  (73s)
+  [epoch 047] step 0216000  G=13.9620 (adv=1.0049 l1=12.9571)  D=0.0013[D_weak]  avg_G=14.0967  avg_D=0.0118  VRAM=2.45GB  (93s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0216000
+  [epoch 047] step 0216100  G=14.9219 (adv=1.0060 l1=13.9160)  D=0.0006[D_weak]  avg_G=14.0674  avg_D=0.0101  VRAM=2.45GB  (113s)
+  [epoch 047] step 0216200  G=14.3104 (adv=1.0014 l1=13.3090)  D=0.0010[D_weak]  avg_G=14.0742  avg_D=0.0090  VRAM=2.45GB  (131s)
+  [epoch 047] step 0216300  G=14.3508 (adv=0.9957 l1=13.3550)  D=0.0006[D_weak]  avg_G=14.0677  avg_D=0.0081  VRAM=2.45GB  (150s)
+  [epoch 047] step 0216400  G=13.2459 (adv=1.0031 l1=12.2428)  D=0.0013[D_weak]  avg_G=14.0711  avg_D=0.0075  VRAM=2.45GB  (168s)
+  [epoch 047] step 0216500  G=13.8290 (adv=0.9979 l1=12.8311)  D=0.0007[D_weak]  avg_G=14.0778  avg_D=0.0070  VRAM=2.45GB  (187s)
+  [epoch 047] step 0216600  G=15.4117 (adv=0.9804 l1=14.4313)  D=0.0009[D_weak]  avg_G=14.0754  avg_D=0.0068  VRAM=2.45GB  (205s)
+  [epoch 047] step 0216700  G=14.8521 (adv=1.0248 l1=13.8272)  D=0.0100[D_weak]  avg_G=14.0777  avg_D=0.0065  VRAM=2.45GB  (224s)
+  [epoch 047] step 0216800  G=15.6127 (adv=0.9912 l1=14.6215)  D=0.0009[D_weak]  avg_G=14.0793  avg_D=0.0062  VRAM=2.45GB  (243s)
+  [epoch 047] step 0216900  G=13.4076 (adv=1.0002 l1=12.4075)  D=0.0004[D_weak]  avg_G=14.0804  avg_D=0.0059  VRAM=2.45GB  (261s)
+  [epoch 047] step 0217000  G=15.2421 (adv=1.0228 l1=14.2193)  D=0.0129[D_weak]  avg_G=14.0828  avg_D=0.0056  VRAM=2.45GB  (279s)
+  [epoch 047] step 0217100  G=13.8972 (adv=0.9988 l1=12.8984)  D=0.0016[D_weak]  avg_G=14.0810  avg_D=0.0055  VRAM=2.45GB  (298s)
+  [epoch 047] step 0217200  G=13.9072 (adv=1.0255 l1=12.8817)  D=0.0009[D_weak]  avg_G=14.0843  avg_D=0.0053  VRAM=2.45GB  (316s)
+  [epoch 047] step 0217300  G=15.1940 (adv=0.9911 l1=14.2029)  D=0.0004[D_weak]  avg_G=14.0866  avg_D=0.0051  VRAM=2.45GB  (335s)
+  [epoch 047] step 0217400  G=13.0936 (adv=1.0023 l1=12.0913)  D=0.0005[D_weak]  avg_G=14.0859  avg_D=0.0050  VRAM=2.45GB  (353s)
+  [epoch 047] step 0217500  G=13.9653 (adv=1.0011 l1=12.9642)  D=0.0038[D_weak]  avg_G=14.0880  avg_D=0.0049  VRAM=2.45GB  (371s)
+  [epoch 047] step 0217600  G=13.9769 (adv=1.0056 l1=12.9712)  D=0.0054[D_weak]  avg_G=14.0868  avg_D=0.0048  VRAM=2.45GB  (390s)
+  [epoch 047] step 0217700  G=13.7467 (adv=0.9964 l1=12.7504)  D=0.0004[D_weak]  avg_G=14.0829  avg_D=0.0046  VRAM=2.45GB  (408s)
+
+[epoch 047 done]  avg G=14.0803  avg D=0.0046  time=6.9 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0217746
+  [epoch 048] step 0217800  G=13.9069 (adv=0.9855 l1=12.9214)  D=0.0018[D_weak]  avg_G=13.8025  avg_D=0.0024  VRAM=2.45GB  (11s)
+  [epoch 048] step 0217900  G=14.0547 (adv=0.9971 l1=13.0576)  D=0.0018[D_weak]  avg_G=13.8340  avg_D=0.0017  VRAM=2.45GB  (29s)
+  [epoch 048] step 0218000  G=13.0596 (adv=0.9370 l1=12.1226)  D=0.0013[D_weak]  avg_G=13.8292  avg_D=0.0017  VRAM=2.45GB  (47s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0218000
+  [epoch 048] step 0218100  G=14.5526 (adv=1.0009 l1=13.5518)  D=0.0010[D_weak]  avg_G=13.8229  avg_D=0.0045  VRAM=2.45GB  (67s)
+  [epoch 048] step 0218200  G=14.3070 (adv=0.9946 l1=13.3124)  D=0.0003[D_weak]  avg_G=13.8565  avg_D=0.0040  VRAM=2.45GB  (85s)
+  [epoch 048] step 0218300  G=13.6067 (adv=1.0036 l1=12.6032)  D=0.0081[D_weak]  avg_G=13.8434  avg_D=0.0035  VRAM=2.45GB  (104s)
+  [epoch 048] step 0218400  G=13.5501 (adv=0.9987 l1=12.5514)  D=0.0003[D_weak]  avg_G=13.8492  avg_D=0.0031  VRAM=2.45GB  (122s)
+  [epoch 048] step 0218500  G=13.7078 (adv=1.0014 l1=12.7064)  D=0.0004[D_weak]  avg_G=13.8542  avg_D=0.0029  VRAM=2.45GB  (140s)
+  [epoch 048] step 0218600  G=13.3832 (adv=1.0017 l1=12.3815)  D=0.0003[D_weak]  avg_G=13.8487  avg_D=0.0027  VRAM=2.45GB  (159s)
+  [epoch 048] step 0218700  G=13.3614 (adv=1.0110 l1=12.3504)  D=0.0008[D_weak]  avg_G=13.8460  avg_D=0.0027  VRAM=2.45GB  (177s)
+  [epoch 048] step 0218800  G=14.6575 (adv=0.9909 l1=13.6666)  D=0.0006[D_weak]  avg_G=13.8389  avg_D=0.0026  VRAM=2.45GB  (195s)
+  [epoch 048] step 0218900  G=13.5582 (adv=0.9995 l1=12.5587)  D=0.0044[D_weak]  avg_G=13.8509  avg_D=0.0026  VRAM=2.45GB  (214s)
+  [epoch 048] step 0219000  G=15.6622 (adv=1.0060 l1=14.6562)  D=0.0037[D_weak]  avg_G=13.8451  avg_D=0.0025  VRAM=2.45GB  (232s)
+  [epoch 048] step 0219100  G=15.0003 (adv=0.9962 l1=14.0041)  D=0.0004[D_weak]  avg_G=13.8414  avg_D=0.0024  VRAM=2.45GB  (250s)
+  [epoch 048] step 0219200  G=13.9612 (adv=0.9772 l1=12.9840)  D=0.0021[D_weak]  avg_G=13.8363  avg_D=0.0024  VRAM=2.45GB  (269s)
+  [epoch 048] step 0219300  G=12.8624 (adv=1.0206 l1=11.8419)  D=0.0035[D_weak]  avg_G=13.8395  avg_D=0.0024  VRAM=2.45GB  (287s)
+  [epoch 048] step 0219400  G=15.1020 (adv=0.9344 l1=14.1676)  D=0.0091[D_weak]  avg_G=13.8364  avg_D=0.0023  VRAM=2.45GB  (305s)
+  [epoch 048] step 0219500  G=13.9105 (adv=1.0021 l1=12.9084)  D=0.0008[D_weak]  avg_G=13.8461  avg_D=0.0023  VRAM=2.45GB  (324s)
+  [epoch 048] step 0219600  G=14.3384 (adv=1.0014 l1=13.3370)  D=0.0003[D_weak]  avg_G=13.8442  avg_D=0.0023  VRAM=2.45GB  (342s)
+  [epoch 048] step 0219700  G=14.3580 (adv=0.9976 l1=13.3604)  D=0.0003[D_weak]  avg_G=13.8512  avg_D=0.0023  VRAM=2.45GB  (360s)
+  [epoch 048] step 0219800  G=14.2789 (adv=0.9983 l1=13.2806)  D=0.0005[D_weak]  avg_G=13.8550  avg_D=0.0023  VRAM=2.45GB  (378s)
+  [epoch 048] step 0219900  G=13.6904 (adv=0.9989 l1=12.6915)  D=0.0002[D_weak]  avg_G=13.8564  avg_D=0.0023  VRAM=2.45GB  (397s)
+
+[epoch 048 done]  avg G=13.8552  avg D=0.0022  time=6.8 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0219966
+  [epoch 049] step 0220000  G=13.0684 (adv=1.0093 l1=12.0591)  D=0.0008[D_weak]  avg_G=13.4135  avg_D=0.0048  VRAM=2.45GB  (7s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0220000
+  [epoch 049] step 0220100  G=15.1737 (adv=1.0040 l1=14.1696)  D=0.0002[D_weak]  avg_G=13.4977  avg_D=0.0026  VRAM=2.45GB  (27s)
+  [epoch 049] step 0220200  G=12.6723 (adv=0.9805 l1=11.6918)  D=0.0018[D_weak]  avg_G=13.5178  avg_D=0.0028  VRAM=2.45GB  (45s)
+  [epoch 049] step 0220300  G=13.3254 (adv=1.0025 l1=12.3229)  D=0.0002[D_weak]  avg_G=13.5172  avg_D=0.0025  VRAM=2.45GB  (63s)
+  [epoch 049] step 0220400  G=16.0577 (adv=0.9953 l1=15.0624)  D=0.0002[D_weak]  avg_G=13.5519  avg_D=0.0022  VRAM=2.45GB  (81s)
+  [epoch 049] step 0220500  G=13.7945 (adv=1.0024 l1=12.7922)  D=0.0002[D_weak]  avg_G=13.5772  avg_D=0.0022  VRAM=2.45GB  (99s)
+  [epoch 049] step 0220600  G=12.1741 (adv=1.0007 l1=11.1735)  D=0.0002[D_weak]  avg_G=13.5865  avg_D=0.0020  VRAM=2.45GB  (118s)
+  [epoch 049] step 0220700  G=13.6294 (adv=1.0097 l1=12.6197)  D=0.0005[D_weak]  avg_G=13.5938  avg_D=0.0018  VRAM=2.45GB  (136s)
+  [epoch 049] step 0220800  G=12.7754 (adv=1.0015 l1=11.7740)  D=0.0003[D_weak]  avg_G=13.6029  avg_D=0.0017  VRAM=2.45GB  (154s)
+  [epoch 049] step 0220900  G=13.3106 (adv=0.9900 l1=12.3206)  D=0.0009[D_weak]  avg_G=13.6026  avg_D=0.0017  VRAM=2.45GB  (172s)
+  [epoch 049] step 0221000  G=12.6373 (adv=0.9952 l1=11.6421)  D=0.0003[D_weak]  avg_G=13.6026  avg_D=0.0016  VRAM=2.45GB  (190s)
+  [epoch 049] step 0221100  G=14.2144 (adv=1.0134 l1=13.2010)  D=0.0019[D_weak]  avg_G=13.6113  avg_D=0.0016  VRAM=2.45GB  (208s)
+  [epoch 049] step 0221200  G=12.9888 (adv=1.0119 l1=11.9769)  D=0.0012[D_weak]  avg_G=13.6127  avg_D=0.0015  VRAM=2.45GB  (226s)
+  [epoch 049] step 0221300  G=12.5534 (adv=1.0263 l1=11.5271)  D=0.0040[D_weak]  avg_G=13.6195  avg_D=0.0015  VRAM=2.45GB  (244s)
+  [epoch 049] step 0221400  G=14.3074 (adv=0.9878 l1=13.3196)  D=0.0005[D_weak]  avg_G=13.6219  avg_D=0.0016  VRAM=2.45GB  (263s)
+  [epoch 049] step 0221500  G=15.1909 (adv=1.0031 l1=14.1877)  D=0.0002[D_weak]  avg_G=13.6241  avg_D=0.0015  VRAM=2.45GB  (281s)
+  [epoch 049] step 0221600  G=14.8666 (adv=0.9975 l1=13.8691)  D=0.0003[D_weak]  avg_G=13.6304  avg_D=0.0014  VRAM=2.45GB  (299s)
+  [epoch 049] step 0221700  G=14.1548 (adv=1.0567 l1=13.0980)  D=0.0062[D_weak]  avg_G=13.6389  avg_D=0.0014  VRAM=2.45GB  (317s)
+  [epoch 049] step 0221800  G=14.9804 (adv=1.0006 l1=13.9798)  D=0.0001[D_weak]  avg_G=13.6405  avg_D=0.0014  VRAM=2.45GB  (335s)
+  [epoch 049] step 0221900  G=14.2669 (adv=0.9950 l1=13.2719)  D=0.0024[D_weak]  avg_G=13.6508  avg_D=0.0014  VRAM=2.45GB  (354s)
+  [epoch 049] step 0222000  G=14.5811 (adv=1.0078 l1=13.5733)  D=0.0003[D_weak]  avg_G=13.6510  avg_D=0.0014  VRAM=2.45GB  (372s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0222000
+  [epoch 049] step 0222100  G=13.6568 (adv=0.9871 l1=12.6698)  D=0.0006[D_weak]  avg_G=13.6577  avg_D=0.0013  VRAM=2.45GB  (391s)
+
+[epoch 049 done]  avg G=13.6587  avg D=0.0013  time=6.8 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0222186
+  [epoch 050] step 0222200  G=13.0818 (adv=1.0162 l1=12.0656)  D=0.0008[D_weak]  avg_G=13.1786  avg_D=0.0004  VRAM=2.45GB  (3s)
+  [epoch 050] step 0222300  G=13.3277 (adv=0.7837 l1=12.5440)  D=0.0106[D_weak]  avg_G=13.5161  avg_D=0.0349  VRAM=2.45GB  (22s)
+  [epoch 050] step 0222400  G=13.9818 (adv=1.0008 l1=12.9809)  D=0.0002[D_weak]  avg_G=13.5470  avg_D=0.0190  VRAM=2.45GB  (40s)
+  [epoch 050] step 0222500  G=12.4048 (adv=1.0007 l1=11.4041)  D=0.0002[D_weak]  avg_G=13.5522  avg_D=0.0136  VRAM=2.45GB  (58s)
+  [epoch 050] step 0222600  G=13.5371 (adv=0.9988 l1=12.5383)  D=0.0001[D_weak]  avg_G=13.4973  avg_D=0.0105  VRAM=2.45GB  (76s)
+  [epoch 050] step 0222700  G=11.9389 (adv=0.9927 l1=10.9462)  D=0.0003[D_weak]  avg_G=13.4612  avg_D=0.0085  VRAM=2.45GB  (95s)
+  [epoch 050] step 0222800  G=14.6904 (adv=0.9981 l1=13.6923)  D=0.0002[D_weak]  avg_G=13.4879  avg_D=0.0076  VRAM=2.45GB  (113s)
+  [epoch 050] step 0222900  G=13.3741 (adv=0.9898 l1=12.3843)  D=0.0013[D_weak]  avg_G=13.4842  avg_D=0.0067  VRAM=2.45GB  (131s)
+  [epoch 050] step 0223000  G=13.3817 (adv=1.0047 l1=12.3770)  D=0.0003[D_weak]  avg_G=13.4775  avg_D=0.0059  VRAM=2.45GB  (149s)
+  [epoch 050] step 0223100  G=11.9149 (adv=1.0035 l1=10.9114)  D=0.0005[D_weak]  avg_G=13.4737  avg_D=0.0054  VRAM=2.45GB  (168s)
+  [epoch 050] step 0223200  G=13.1574 (adv=1.0015 l1=12.1559)  D=0.0001[D_weak]  avg_G=13.4716  avg_D=0.0050  VRAM=2.45GB  (186s)
+  [epoch 050] step 0223300  G=14.6188 (adv=1.0053 l1=13.6135)  D=0.0004[D_weak]  avg_G=13.4717  avg_D=0.0046  VRAM=2.45GB  (204s)
+  [epoch 050] step 0223400  G=14.6712 (adv=0.9996 l1=13.6715)  D=0.0001[D_weak]  avg_G=13.4826  avg_D=0.0042  VRAM=2.45GB  (223s)
+  [epoch 050] step 0223500  G=14.1887 (adv=0.9945 l1=13.1942)  D=0.0007[D_weak]  avg_G=13.4905  avg_D=0.0040  VRAM=2.45GB  (241s)
+  [epoch 050] step 0223600  G=12.9080 (adv=1.0010 l1=11.9070)  D=0.0002[D_weak]  avg_G=13.4916  avg_D=0.0037  VRAM=2.45GB  (260s)
+  [epoch 050] step 0223700  G=12.7577 (adv=1.0014 l1=11.7563)  D=0.0001[D_weak]  avg_G=13.4850  avg_D=0.0035  VRAM=2.45GB  (279s)
+  [epoch 050] step 0223800  G=14.2690 (adv=1.0012 l1=13.2678)  D=0.0002[D_weak]  avg_G=13.4843  avg_D=0.0034  VRAM=2.45GB  (297s)
+  [epoch 050] step 0223900  G=12.8759 (adv=1.0011 l1=11.8748)  D=0.0001[D_weak]  avg_G=13.4887  avg_D=0.0033  VRAM=2.45GB  (316s)
+  [epoch 050] step 0224000  G=14.3455 (adv=1.0012 l1=13.3442)  D=0.0002[D_weak]  avg_G=13.4912  avg_D=0.0032  VRAM=2.45GB  (334s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0224000
+  [epoch 050] step 0224100  G=11.2557 (adv=1.0154 l1=10.2403)  D=0.0010[D_weak]  avg_G=13.4895  avg_D=0.0030  VRAM=2.45GB  (353s)
+  [epoch 050] step 0224200  G=14.3473 (adv=0.9996 l1=13.3477)  D=0.0001[D_weak]  avg_G=13.4867  avg_D=0.0029  VRAM=2.45GB  (372s)
+  [epoch 050] step 0224300  G=13.7174 (adv=0.9976 l1=12.7198)  D=0.0002[D_weak]  avg_G=13.4876  avg_D=0.0028  VRAM=2.45GB  (390s)
+  [epoch 050] step 0224400  G=13.8147 (adv=1.0004 l1=12.8143)  D=0.0031[D_weak]  avg_G=13.4878  avg_D=0.0027  VRAM=2.45GB  (408s)
+
+[epoch 050 done]  avg G=13.4877  avg D=0.0027  time=6.8 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0224406
+  [epoch 051] step 0224500  G=13.3753 (adv=0.9953 l1=12.3800)  D=0.0001[D_weak]  avg_G=13.2632  avg_D=0.0006  VRAM=2.45GB  (18s)
+  [epoch 051] step 0224600  G=11.7367 (adv=0.9821 l1=10.7546)  D=0.0042[D_weak]  avg_G=13.3249  avg_D=0.0007  VRAM=2.45GB  (36s)
+  [epoch 051] step 0224700  G=13.3316 (adv=0.9914 l1=12.3402)  D=0.0005[D_weak]  avg_G=13.3019  avg_D=0.0006  VRAM=2.45GB  (54s)
+  [epoch 051] step 0224800  G=12.5475 (adv=1.0189 l1=11.5286)  D=0.0023[D_weak]  avg_G=13.2930  avg_D=0.0006  VRAM=2.45GB  (73s)
+  [epoch 051] step 0224900  G=12.7170 (adv=0.9993 l1=11.7177)  D=0.0001[D_weak]  avg_G=13.3206  avg_D=0.0008  VRAM=2.45GB  (91s)
+  [epoch 051] step 0225000  G=13.2701 (adv=0.9835 l1=12.2866)  D=0.0014[D_weak]  avg_G=13.3479  avg_D=0.0008  VRAM=2.45GB  (109s)
+  [epoch 051] step 0225100  G=13.0320 (adv=0.9990 l1=12.0330)  D=0.0001[D_weak]  avg_G=13.3248  avg_D=0.0008  VRAM=2.45GB  (127s)
+  [epoch 051] step 0225200  G=13.0599 (adv=1.0031 l1=12.0568)  D=0.0001[D_weak]  avg_G=13.3375  avg_D=0.0007  VRAM=2.45GB  (146s)
+  [epoch 051] step 0225300  G=14.7537 (adv=1.0037 l1=13.7499)  D=0.0002[D_weak]  avg_G=13.3399  avg_D=0.0007  VRAM=2.45GB  (164s)
+  [epoch 051] step 0225400  G=14.4274 (adv=0.9981 l1=13.4293)  D=0.0001[D_weak]  avg_G=13.3480  avg_D=0.0008  VRAM=2.45GB  (182s)
+  [epoch 051] step 0225500  G=12.7798 (adv=0.9952 l1=11.7846)  D=0.0003[D_weak]  avg_G=13.3284  avg_D=0.0007  VRAM=2.45GB  (201s)
+  [epoch 051] step 0225600  G=12.2363 (adv=0.9997 l1=11.2366)  D=0.0007[D_weak]  avg_G=13.3170  avg_D=0.0023  VRAM=2.45GB  (219s)
+  [epoch 051] step 0225700  G=12.9108 (adv=0.9566 l1=11.9543)  D=0.0196[D_weak]  avg_G=13.3255  avg_D=0.0024  VRAM=2.45GB  (237s)
+  [epoch 051] step 0225800  G=13.5188 (adv=0.9700 l1=12.5488)  D=0.0017[D_weak]  avg_G=13.3276  avg_D=0.0024  VRAM=2.45GB  (255s)
+  [epoch 051] step 0225900  G=12.2360 (adv=0.9963 l1=11.2397)  D=0.0002[D_weak]  avg_G=13.3186  avg_D=0.0023  VRAM=2.45GB  (274s)
+  [epoch 051] step 0226000  G=11.5412 (adv=1.0027 l1=10.5385)  D=0.0002[D_weak]  avg_G=13.3152  avg_D=0.0022  VRAM=2.45GB  (292s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0226000
+  [epoch 051] step 0226100  G=11.9153 (adv=0.9872 l1=10.9281)  D=0.0006[D_weak]  avg_G=13.3135  avg_D=0.0022  VRAM=2.45GB  (312s)
+  [epoch 051] step 0226200  G=13.0200 (adv=1.0102 l1=12.0098)  D=0.0005[D_weak]  avg_G=13.3200  avg_D=0.0022  VRAM=2.45GB  (330s)
+  [epoch 051] step 0226300  G=14.1807 (adv=0.8496 l1=13.3312)  D=0.0162[D_weak]  avg_G=13.3240  avg_D=0.0022  VRAM=2.45GB  (348s)
+  [epoch 051] step 0226400  G=12.1404 (adv=0.9943 l1=11.1461)  D=0.0003[D_weak]  avg_G=13.3261  avg_D=0.0022  VRAM=2.45GB  (370s)
+  [epoch 051] step 0226500  G=12.8608 (adv=0.9960 l1=11.8648)  D=0.0003[D_weak]  avg_G=13.3255  avg_D=0.0021  VRAM=2.45GB  (388s)
+  [epoch 051] step 0226600  G=13.0791 (adv=1.0030 l1=12.0762)  D=0.0001[D_weak]  avg_G=13.3274  avg_D=0.0020  VRAM=2.45GB  (406s)
+
+[epoch 051 done]  avg G=13.3251  avg D=0.0020  time=6.9 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0226626
+  [epoch 052] step 0226700  G=11.2561 (adv=0.9992 l1=10.2569)  D=0.0001[D_weak]  avg_G=13.0791  avg_D=0.0005  VRAM=2.45GB  (14s)
+  [epoch 052] step 0226800  G=14.2124 (adv=1.0023 l1=13.2101)  D=0.0028[D_weak]  avg_G=13.0388  avg_D=0.0007  VRAM=2.45GB  (32s)
+  [epoch 052] step 0226900  G=12.9572 (adv=0.9975 l1=11.9596)  D=0.0002[D_weak]  avg_G=13.0577  avg_D=0.0005  VRAM=2.45GB  (51s)
+  [epoch 052] step 0227000  G=12.9788 (adv=1.0005 l1=11.9782)  D=0.0001[D_weak]  avg_G=13.0708  avg_D=0.0006  VRAM=2.45GB  (69s)
+  [epoch 052] step 0227100  G=13.4239 (adv=1.0009 l1=12.4230)  D=0.0006[D_weak]  avg_G=13.1154  avg_D=0.0006  VRAM=2.45GB  (87s)
+  [epoch 052] step 0227200  G=14.2500 (adv=1.0000 l1=13.2500)  D=0.0005[D_weak]  avg_G=13.1209  avg_D=0.0006  VRAM=2.45GB  (106s)
+  [epoch 052] step 0227300  G=13.3371 (adv=1.0198 l1=12.3172)  D=0.0011[D_weak]  avg_G=13.1198  avg_D=0.0045  VRAM=2.45GB  (124s)
+  [epoch 052] step 0227400  G=13.0313 (adv=0.9984 l1=12.0329)  D=0.0001[D_weak]  avg_G=13.1345  avg_D=0.0043  VRAM=2.45GB  (142s)
+  [epoch 052] step 0227500  G=13.3100 (adv=1.0025 l1=12.3075)  D=0.0001[D_weak]  avg_G=13.1406  avg_D=0.0039  VRAM=2.45GB  (161s)
+  [epoch 052] step 0227600  G=13.2021 (adv=0.9838 l1=12.2183)  D=0.0076[D_weak]  avg_G=13.1380  avg_D=0.0036  VRAM=2.45GB  (180s)
+  [epoch 052] step 0227700  G=13.2021 (adv=0.9930 l1=12.2091)  D=0.0003[D_weak]  avg_G=13.1486  avg_D=0.0033  VRAM=2.45GB  (198s)
+  [epoch 052] step 0227800  G=13.2363 (adv=1.0002 l1=12.2361)  D=0.0001[D_weak]  avg_G=13.1650  avg_D=0.0031  VRAM=2.45GB  (216s)
+  [epoch 052] step 0227900  G=15.5676 (adv=0.9967 l1=14.5709)  D=0.0005[D_weak]  avg_G=13.1757  avg_D=0.0029  VRAM=2.45GB  (234s)
+  [epoch 052] step 0228000  G=14.3188 (adv=0.9984 l1=13.3203)  D=0.0001[D_weak]  avg_G=13.1806  avg_D=0.0027  VRAM=2.45GB  (253s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0228000
+  [epoch 052] step 0228100  G=12.6911 (adv=0.9991 l1=11.6920)  D=0.0002[D_weak]  avg_G=13.1797  avg_D=0.0026  VRAM=2.45GB  (272s)
+  [epoch 052] step 0228200  G=12.9308 (adv=0.9992 l1=11.9316)  D=0.0001[D_weak]  avg_G=13.1751  avg_D=0.0024  VRAM=2.45GB  (290s)
+  [epoch 052] step 0228300  G=13.7353 (adv=1.0002 l1=12.7351)  D=0.0000[D_weak]  avg_G=13.1811  avg_D=0.0023  VRAM=2.45GB  (310s)
+  [epoch 052] step 0228400  G=13.8497 (adv=1.0007 l1=12.8491)  D=0.0000[D_weak]  avg_G=13.1805  avg_D=0.0022  VRAM=2.45GB  (330s)
+  [epoch 052] step 0228500  G=14.5512 (adv=1.0004 l1=13.5509)  D=0.0000[D_weak]  avg_G=13.1749  avg_D=0.0021  VRAM=2.45GB  (348s)
+  [epoch 052] step 0228600  G=13.4887 (adv=0.9761 l1=12.5126)  D=0.0005[D_weak]  avg_G=13.1759  avg_D=0.0021  VRAM=2.45GB  (366s)
+  [epoch 052] step 0228700  G=13.2421 (adv=1.0027 l1=12.2394)  D=0.0001[D_weak]  avg_G=13.1774  avg_D=0.0020  VRAM=2.45GB  (384s)
+  [epoch 052] step 0228800  G=13.9303 (adv=1.0023 l1=12.9280)  D=0.0011[D_weak]  avg_G=13.1808  avg_D=0.0020  VRAM=2.45GB  (402s)
+
+[epoch 052 done]  avg G=13.1795  avg D=0.0019  time=6.8 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0228846
+  [epoch 053] step 0228900  G=12.3421 (adv=1.0004 l1=11.3416)  D=0.0002[D_weak]  avg_G=12.9634  avg_D=0.0016  VRAM=2.45GB  (10s)
+  [epoch 053] step 0229000  G=12.2063 (adv=0.9994 l1=11.2069)  D=0.0001[D_weak]  avg_G=12.9174  avg_D=0.0009  VRAM=2.45GB  (29s)
+  [epoch 053] step 0229100  G=13.9495 (adv=1.0045 l1=12.9450)  D=0.0219[D_weak]  avg_G=13.0082  avg_D=0.0010  VRAM=2.45GB  (47s)
+  [epoch 053] step 0229200  G=13.8981 (adv=1.0007 l1=12.8974)  D=0.0006[D_weak]  avg_G=12.9790  avg_D=0.0008  VRAM=2.45GB  (65s)
+  [epoch 053] step 0229300  G=12.6649 (adv=0.9991 l1=11.6659)  D=0.0001[D_weak]  avg_G=12.9880  avg_D=0.0008  VRAM=2.45GB  (83s)
+  [epoch 053] step 0229400  G=12.7109 (adv=1.0006 l1=11.7103)  D=0.0001[D_weak]  avg_G=12.9697  avg_D=0.0008  VRAM=2.45GB  (101s)
+  [epoch 053] step 0229500  G=13.2882 (adv=1.0011 l1=12.2871)  D=0.0005[D_weak]  avg_G=12.9795  avg_D=0.0008  VRAM=2.45GB  (119s)
+  [epoch 053] step 0229600  G=13.2264 (adv=0.9946 l1=12.2318)  D=0.0004[D_weak]  avg_G=12.9871  avg_D=0.0017  VRAM=2.45GB  (137s)
+  [epoch 053] step 0229700  G=12.9295 (adv=1.0030 l1=11.9266)  D=0.0001[D_weak]  avg_G=12.9966  avg_D=0.0016  VRAM=2.45GB  (156s)
+  [epoch 053] step 0229800  G=11.9579 (adv=0.9998 l1=10.9581)  D=0.0000[D_weak]  avg_G=13.0038  avg_D=0.0015  VRAM=2.45GB  (174s)
+  [epoch 053] step 0229900  G=12.7676 (adv=0.9981 l1=11.7695)  D=0.0001[D_weak]  avg_G=13.0111  avg_D=0.0014  VRAM=2.45GB  (192s)
+  [epoch 053] step 0230000  G=12.3465 (adv=1.0028 l1=11.3437)  D=0.0001[D_weak]  avg_G=13.0186  avg_D=0.0013  VRAM=2.45GB  (210s)
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0230000
+  [epoch 053] step 0230100  G=13.3599 (adv=1.0001 l1=12.3597)  D=0.0000[D_weak]  avg_G=13.0177  avg_D=0.0012  VRAM=2.45GB  (230s)
+  [epoch 053] step 0230200  G=12.7603 (adv=1.0020 l1=11.7582)  D=0.0002[D_weak]  avg_G=13.0189  avg_D=0.0011  VRAM=2.45GB  (248s)
+  [epoch 053] step 0230300  G=11.7825 (adv=1.0039 l1=10.7786)  D=0.0006[D_weak]  avg_G=13.0182  avg_D=0.0011  VRAM=2.45GB  (266s)
+  [epoch 053] step 0230400  G=12.5018 (adv=1.0002 l1=11.5016)  D=0.0001[D_weak]  avg_G=13.0158  avg_D=0.0010  VRAM=2.45GB  (285s)
+  [epoch 053] step 0230500  G=14.0533 (adv=1.0002 l1=13.0531)  D=0.0005[D_weak]  avg_G=13.0247  avg_D=0.0010  VRAM=2.45GB  (303s)
+  [epoch 053] step 0230600  G=13.7372 (adv=0.9987 l1=12.7384)  D=0.0000[D_weak]  avg_G=13.0272  avg_D=0.0010  VRAM=2.45GB  (321s)
+  [epoch 053] step 0230700  G=14.1954 (adv=0.9975 l1=13.1979)  D=0.0010[D_weak]  avg_G=13.0239  avg_D=0.0009  VRAM=2.45GB  (340s)
+  [epoch 053] step 0230800  G=14.1522 (adv=0.9540 l1=13.1982)  D=0.0004[D_weak]  avg_G=13.0328  avg_D=0.0009  VRAM=2.45GB  (358s)
+  [epoch 053] step 0230900  G=14.5439 (adv=0.9984 l1=13.5455)  D=0.0004[D_weak]  avg_G=13.0359  avg_D=0.0009  VRAM=2.45GB  (376s)
+  [epoch 053] step 0231000  G=12.7463 (adv=0.9766 l1=11.7698)  D=0.0079[D_weak]  avg_G=13.0348  avg_D=0.0009  VRAM=2.45GB  (395s)
+
+[epoch 053 done]  avg G=13.0414  avg D=0.0009  time=6.8 min  lr=2.00e-04
+
+    [ckpt] saved → experiments/phase2/runs/gan_v2_random_d/ckpts/step0231066
+[*] GAN training complete.
