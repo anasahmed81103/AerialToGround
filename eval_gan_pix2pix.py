@@ -31,7 +31,7 @@ from gan_metrics import (
     lpips_sum,
     ssim_sum,
 )
-from train_gan_pix2pix import GANDataset, build_generator
+from train_gan_pix2pix import GANDataset, build_generator, generator_forward
 
 
 def load_generator(
@@ -43,6 +43,7 @@ def load_generator(
     generator: str = 'unet',
     img_h: int = 256,
     img_w: int = 512,
+    aux_aerial: bool = False,
 ):
     class _Args:
         pass
@@ -53,6 +54,7 @@ def load_generator(
     a.ngf = ngf
     a.img_h = img_h
     a.img_w = img_w
+    a.aux_aerial = aux_aerial
     G = build_generator(a).to(device)
     ck = torch.load(ckpt_path, map_location=device, weights_only=False)
     G.load_state_dict(ck['model'])
@@ -73,6 +75,8 @@ def main():
     p.add_argument('--img_w', type=int, default=512)
     p.add_argument('--ngf', type=int, default=64)
     p.add_argument('--generator', choices=('unet', 'spade'), default='unet')
+    p.add_argument('--aux_aerial', action='store_true',
+                   help='SPADE: also condition on warped aerial RGB (CSV col 0).')
     p.add_argument('--skip_fid', action='store_true',
                    help='Skip FID (faster; use for tiny subsets).')
     p.add_argument('--skip_lpips', action='store_true')
@@ -90,6 +94,7 @@ def main():
         generator=args.generator,
         img_h=args.img_h,
         img_w=args.img_w,
+        aux_aerial=args.aux_aerial,
     )
     print(f'[*] generator step: {step}')
 
@@ -99,6 +104,7 @@ def main():
         img_h=args.img_h,
         img_w=args.img_w,
         max_samples=args.max_samples,
+        aux_aerial=args.aux_aerial,
     )
     dl = DataLoader(ds, batch_size=args.batch_size, shuffle=False, num_workers=0)
 
@@ -109,9 +115,15 @@ def main():
     n_images = 0
 
     t0 = time.time()
-    for bi, (label, real) in enumerate(dl):
+    for bi, batch in enumerate(dl):
+        if args.aux_aerial:
+            label, real, aerial = batch
+            aerial = aerial.to(device)
+        else:
+            label, real = batch
+            aerial = None
         label = label.to(device)
-        fake = G(label)
+        fake = generator_forward(G, label, aerial, args.aux_aerial)
         n_images += real.shape[0]
 
         st, sc = ssim_sum(real, fake.cpu())
