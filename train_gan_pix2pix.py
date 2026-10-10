@@ -104,18 +104,32 @@ def get_args():
     p.add_argument('--d_diag_max_steps', type=int, default=500,
                    help='Print [D_diag] through this many run-steps after resume (0=off). '
                         'Use ~4500 for a 2-epoch gan_v2_diag3 run.')
+    p.add_argument('--aux_aerial', action='store_true',
+                   help='SPADE only: warp aerial RGB (CSV col 0) as extra G conditioning.')
+    p.add_argument('--keep_ckpts', type=int, default=3,
+                   help='Rolling checkpoint retention per G/D (default 3).')
     return p.parse_args()
 
 
 def build_generator(args) -> nn.Module:
     if args.generator == 'unet':
+        if getattr(args, 'aux_aerial', False):
+            raise ValueError('--aux_aerial requires --generator spade')
         return UNetGenerator(in_ch=args.num_classes, ngf=args.ngf)
     return SPADEGenerator(
         label_nc=args.num_classes,
         ngf=args.ngf,
         img_h=args.img_h,
         img_w=args.img_w,
+        aux_aerial=getattr(args, 'aux_aerial', False),
     )
+
+
+def generator_forward(G: nn.Module, label: torch.Tensor,
+                      aerial: torch.Tensor | None, aux_aerial: bool) -> torch.Tensor:
+    if aux_aerial:
+        return G(label, aerial)
+    return G(label)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -135,10 +149,13 @@ class GANDataset(Dataset):
 
     def __init__(self, csv_path: str, num_classes: int = 4,
                  img_h: int = 256, img_w: int = 512,
-                 root: str = '', max_samples: int = None):
+                 root: str = '', max_samples: int = None,
+                 aux_aerial: bool = False):
         self.num_classes = num_classes
         self.img_h = img_h
         self.img_w = img_w
+        self.aux_aerial = aux_aerial
+        self._warper = None
 
         samples = []
         with open(csv_path, encoding='utf-8') as f:
@@ -148,7 +165,10 @@ class GANDataset(Dataset):
                     continue
                 if root:
                     parts = [os.path.join(root, p) for p in parts]
-                samples.append({'ground': parts[1], 'label': parts[2]})
+                rec = {'ground': parts[1], 'label': parts[2]}
+                if aux_aerial:
+                    rec['aerial'] = parts[0]
+                samples.append(rec)
 
         if max_samples is not None:
             import random
@@ -156,6 +176,12 @@ class GANDataset(Dataset):
             samples = samples[:max_samples]
 
         self.samples = samples
+
+    def _get_warper(self):
+        if self._warper is None:
+            from aerial_warp import PanoAerialWarper
+            self._warper = PanoAerialWarper((self.img_h, self.img_w))
+        return self._warper
 
     def __len__(self) -> int:
         return len(self.samples)
@@ -183,6 +209,9 @@ class GANDataset(Dataset):
         g_np    = np.array(g_pil, dtype=np.float32) / 127.5 - 1.0   # [−1, 1]
         ground_t = torch.from_numpy(g_np.transpose(2, 0, 1))
 
+        if self.aux_aerial:
+            aerial_t = self._get_warper().warp_aerial_to_pano(s['aerial'])
+            return label_t, ground_t, aerial_t
         return label_t, ground_t
 
 
@@ -217,7 +246,7 @@ def generator_adv_loss(fake_scores: torch.Tensor) -> torch.Tensor:
 # ──────────────────────────────────────────────────────────────────────────────
 
 def save_checkpoints(G, D, opt_G, opt_D, scaler_G, scaler_D,
-                     step: int, epoch: int, ckpt_dir: str):
+                     step: int, epoch: int, ckpt_dir: str, keep: int = 3):
     os.makedirs(ckpt_dir, exist_ok=True)
     tag = f'step{step:07d}'
 
@@ -237,7 +266,8 @@ def save_checkpoints(G, D, opt_G, opt_D, scaler_G, scaler_D,
             f for f in os.listdir(ckpt_dir)
             if f.startswith(prefix + '_') and f.endswith('.pt')
         )
-        for old in ckpts[:-3]:
+        keep_n = max(1, keep)
+        for old in ckpts[:-keep_n]:
             os.remove(os.path.join(ckpt_dir, old))
 
     print(f'    [ckpt] saved → {ckpt_dir}/{tag}')
@@ -383,6 +413,7 @@ def train(args):
         img_h       = args.img_h,
         img_w       = args.img_w,
         max_samples = args.max_samples,
+        aux_aerial  = args.aux_aerial,
     )
     dl = DataLoader(
         ds,
@@ -417,13 +448,19 @@ def train(args):
         epoch_loss_G = epoch_loss_D = 0.0
         epoch_t0 = time.time()
 
-        for batch_idx, (label, real_g) in enumerate(dl):
+        for batch_idx, batch in enumerate(dl):
+            if args.aux_aerial:
+                label, real_g, aerial = batch
+                aerial = aerial.to(device, non_blocking=True)
+            else:
+                label, real_g = batch
+                aerial = None
             label  = label.to(device,  non_blocking=True)
             real_g = real_g.to(device, non_blocking=True)
 
             # ── Step D (once per batch) ───────────────────────────────────────
             with autocast('cuda', enabled=use_amp):
-                fake_g      = G(label)
+                fake_g      = generator_forward(G, label, aerial, args.aux_aerial)
                 real_score  = D(label, real_g)
                 fake_score  = D(label, fake_g.detach())
                 loss_D      = discriminator_loss(real_score, fake_score,
@@ -469,7 +506,7 @@ def train(args):
                 if g_iter > 0:
                     # Only recompute fake_g on subsequent G steps
                     with autocast('cuda', enabled=use_amp):
-                        fake_g = G(label)
+                        fake_g = generator_forward(G, label, aerial, args.aux_aerial)
 
                 with autocast('cuda', enabled=use_amp):
                     fake_score_g = D(label, fake_g)
@@ -526,7 +563,7 @@ def train(args):
             # ── Checkpoint ────────────────────────────────────────────────────
             if global_step % args.save_every == 0:
                 save_checkpoints(G, D, opt_G, opt_D, scaler_G, scaler_D,
-                                 global_step, epoch, args.ckpt_dir)
+                                 global_step, epoch, args.ckpt_dir, args.keep_ckpts)
 
         # ── End-of-epoch ──────────────────────────────────────────────────────
         n_b      = max(len(dl), 1)
@@ -542,7 +579,7 @@ def train(args):
         )
 
         save_checkpoints(G, D, opt_G, opt_D, scaler_G, scaler_D,
-                         global_step, epoch + 1, args.ckpt_dir)
+                         global_step, epoch + 1, args.ckpt_dir, args.keep_ckpts)
 
     print('[*] GAN training complete.')
 

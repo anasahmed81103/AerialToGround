@@ -30,7 +30,9 @@ class SPADE(nn.Module):
         self.mlp_beta = nn.Conv2d(hidden, norm_nc, kernel_size=3, padding=1)
 
     def forward(self, x: torch.Tensor, seg: torch.Tensor) -> torch.Tensor:
-        seg = F.interpolate(seg, size=x.shape[2:], mode='nearest')
+        # Caller may pass pre-sized 7-ch cond (label nearest + aerial bilinear).
+        if seg.shape[2:] != x.shape[2:]:
+            seg = F.interpolate(seg, size=x.shape[2:], mode='nearest')
         normalized = self.param_free_norm(x)
         actv = self.mlp_shared(seg)
         gamma = self.mlp_gamma(actv)
@@ -82,9 +84,12 @@ class SPADEGenerator(nn.Module):
         img_h: int = 256,
         img_w: int = 512,
         num_up_layers: int = 5,
+        aux_aerial: bool = False,
     ):
         super().__init__()
-        self.label_nc = label_nc
+        self.semantic_nc = label_nc
+        self.use_aux_aerial = aux_aerial
+        self.cond_nc = label_nc + (3 if aux_aerial else 0)
         self.sh = img_h // (2 ** num_up_layers)
         self.sw = img_w // (2 ** num_up_layers)
         if self.sh < 1 or self.sw < 1:
@@ -94,16 +99,17 @@ class SPADEGenerator(nn.Module):
 
         nf = ngf
         nfc = 16 * nf
+        cnc = self.cond_nc
 
-        self.fc = nn.Conv2d(label_nc, nfc, kernel_size=3, padding=1)
-        self.head_0 = SPADEResnetBlock(nfc, nfc, label_nc)
-        self.G_middle_0 = SPADEResnetBlock(nfc, nfc, label_nc)
-        self.G_middle_1 = SPADEResnetBlock(nfc, nfc, label_nc)
+        self.fc = nn.Conv2d(cnc, nfc, kernel_size=3, padding=1)
+        self.head_0 = SPADEResnetBlock(nfc, nfc, cnc)
+        self.G_middle_0 = SPADEResnetBlock(nfc, nfc, cnc)
+        self.G_middle_1 = SPADEResnetBlock(nfc, nfc, cnc)
 
-        self.up_0 = SPADEResnetBlock(nfc, 8 * nf, label_nc)
-        self.up_1 = SPADEResnetBlock(8 * nf, 4 * nf, label_nc)
-        self.up_2 = SPADEResnetBlock(4 * nf, 2 * nf, label_nc)
-        self.up_3 = SPADEResnetBlock(2 * nf, 1 * nf, label_nc)
+        self.up_0 = SPADEResnetBlock(nfc, 8 * nf, cnc)
+        self.up_1 = SPADEResnetBlock(8 * nf, 4 * nf, cnc)
+        self.up_2 = SPADEResnetBlock(4 * nf, 2 * nf, cnc)
+        self.up_3 = SPADEResnetBlock(2 * nf, 1 * nf, cnc)
 
         self.conv_img = nn.Conv2d(nf, 3, kernel_size=3, padding=1)
 
@@ -112,23 +118,48 @@ class SPADEGenerator(nn.Module):
         """One-hot [−1, 1] → soft one-hot [0, 1] for SPADE MLPs."""
         return (label + 1.0) * 0.5
 
-    def forward(self, label: torch.Tensor) -> torch.Tensor:
-        seg = self._labels_to_seg(label)
+    def _resize_aerial(self, aerial: torch.Tensor, size: tuple[int, int]) -> torch.Tensor:
+        down = aerial.shape[2] > size[0] or aerial.shape[3] > size[1]
+        return F.interpolate(
+            aerial,
+            size=size,
+            mode='bilinear',
+            align_corners=False,
+            antialias=down,
+        )
 
-        x = F.interpolate(seg, size=(self.sh, self.sw), mode='nearest')
-        x = self.fc(x)
-        x = self.head_0(x, seg)
-        x = self.G_middle_0(x, seg)
-        x = self.G_middle_1(x, seg)
+    def _condition_at(
+        self,
+        label: torch.Tensor,
+        aerial: torch.Tensor | None,
+        size: tuple[int, int],
+    ) -> torch.Tensor:
+        lbl = self._labels_to_seg(label)
+        lbl = F.interpolate(lbl, size=size, mode='nearest')
+        if not self.use_aux_aerial:
+            return lbl
+        if aerial is None:
+            raise ValueError('aux_aerial SPADE requires aerial tensor')
+        aer = self._resize_aerial(aerial, size)
+        return torch.cat([lbl, aer], dim=1)
+
+    def forward(self, label: torch.Tensor, aerial: torch.Tensor | None = None) -> torch.Tensor:
+        if self.use_aux_aerial and aerial is None:
+            raise ValueError('aux_aerial SPADE requires aerial input')
+
+        x = self.fc(self._condition_at(label, aerial, (self.sh, self.sw)))
+        x = self.head_0(x, self._condition_at(label, aerial, x.shape[2:]))
+        x = self.G_middle_0(x, self._condition_at(label, aerial, x.shape[2:]))
+        x = self.G_middle_1(x, self._condition_at(label, aerial, x.shape[2:]))
 
         x = F.interpolate(x, scale_factor=2, mode='nearest')
-        x = self.up_0(x, seg)
+        x = self.up_0(x, self._condition_at(label, aerial, x.shape[2:]))
         x = F.interpolate(x, scale_factor=2, mode='nearest')
-        x = self.up_1(x, seg)
+        x = self.up_1(x, self._condition_at(label, aerial, x.shape[2:]))
         x = F.interpolate(x, scale_factor=2, mode='nearest')
-        x = self.up_2(x, seg)
+        x = self.up_2(x, self._condition_at(label, aerial, x.shape[2:]))
         x = F.interpolate(x, scale_factor=2, mode='nearest')
-        x = self.up_3(x, seg)
+        x = self.up_3(x, self._condition_at(label, aerial, x.shape[2:]))
         x = F.interpolate(x, scale_factor=2, mode='nearest')
 
         x = self.conv_img(F.leaky_relu(x, 0.2, inplace=True))
