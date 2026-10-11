@@ -9,6 +9,8 @@ from __future__ import annotations
 import numpy as np
 import torch
 import torch.nn.functional as F
+from scipy import ndimage
+from skimage.metrics import peak_signal_noise_ratio as skimage_psnr
 from skimage.metrics import structural_similarity as skimage_ssim
 
 
@@ -33,6 +35,48 @@ def ssim_sum(real: torch.Tensor, fake: torch.Tensor) -> tuple[float, int]:
     for i in range(r.shape[0]):
         total += skimage_ssim(r[i], f[i], channel_axis=2, data_range=255)
     return total, r.shape[0]
+
+
+def per_image_ssim(real: torch.Tensor, fake: torch.Tensor) -> np.ndarray:
+    r = tensor_to_uint8_nhwc(real)
+    f = tensor_to_uint8_nhwc(fake)
+    out = np.empty(r.shape[0], dtype=np.float64)
+    for i in range(r.shape[0]):
+        out[i] = skimage_ssim(r[i], f[i], channel_axis=2, data_range=255)
+    return out
+
+
+def per_image_psnr(real: torch.Tensor, fake: torch.Tensor) -> np.ndarray:
+    r = tensor_to_uint8_nhwc(real)
+    f = tensor_to_uint8_nhwc(fake)
+    out = np.empty(r.shape[0], dtype=np.float64)
+    for i in range(r.shape[0]):
+        out[i] = skimage_psnr(r[i], f[i], data_range=255)
+    return out
+
+
+def _laplacian_sharpness_uint8(img: np.ndarray) -> float:
+    """Variance of Laplacian on luminance (higher = sharper)."""
+    gray = (
+        0.299 * img[..., 0].astype(np.float64)
+        + 0.587 * img[..., 1].astype(np.float64)
+        + 0.114 * img[..., 2].astype(np.float64)
+    )
+    lap = ndimage.laplace(gray)
+    return float(np.var(lap))
+
+
+def per_image_sharpness_diff(real: torch.Tensor, fake: torch.Tensor) -> np.ndarray:
+    """
+    Sharpness difference (SD): |sharp(real) - sharp(fake)| per image.
+    Sharpness = variance of Laplacian on luminance (common synthesis benchmark).
+    """
+    r = tensor_to_uint8_nhwc(real)
+    f = tensor_to_uint8_nhwc(fake)
+    out = np.empty(r.shape[0], dtype=np.float64)
+    for i in range(r.shape[0]):
+        out[i] = abs(_laplacian_sharpness_uint8(r[i]) - _laplacian_sharpness_uint8(f[i]))
+    return out
 
 
 def _get_lpips():
@@ -63,6 +107,17 @@ def lpips_sum(real: torch.Tensor, fake: torch.Tensor, device: torch.device) -> t
         d = _lpips_model(real.to(device), fake.to(device))
     n = int(d.numel())
     return float(d.sum().cpu()), n
+
+
+def per_image_lpips(real: torch.Tensor, fake: torch.Tensor, device: torch.device) -> np.ndarray:
+    global _lpips_model
+    lpips = _get_lpips()
+    if _lpips_model is None:
+        _lpips_model = lpips.LPIPS(net='alex').to(device)
+        _lpips_model.eval()
+    with torch.no_grad():
+        d = _lpips_model(real.to(device), fake.to(device))
+    return d.view(-1).detach().cpu().numpy().astype(np.float64)
 
 
 class _InceptionFID(torch.nn.Module):

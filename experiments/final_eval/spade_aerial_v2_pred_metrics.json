@@ -1,0 +1,20 @@
+{
+  "config_key": "E",
+  "slug": "spade_aerial_v2_pred",
+  "gan_ckpt": "experiments/phase2/runs/spade_aerial_v2/ckpts/G_step0032000.pt",
+  "generator": "spade",
+  "aux_aerial": true,
+  "layout": "pred",
+  "generator_step": 32000,
+  "val_csv": "cvpr_val_v2.csv",
+  "n_images": 64,
+  "mean_ssim": 0.4461453596170212,
+  "mean_psnr": 14.603699894827018,
+  "mean_lpips": 0.6556990407407284,
+  "mean_sd": 602.8004952822711,
+  "elapsed_sec": 18.98,
+  "skipped": true,
+  "smoke": true,
+  "per_image_sec_mean": 0.008742789061898293,
+  "per_image_sec_p50": 0.00543265000305837
+}
