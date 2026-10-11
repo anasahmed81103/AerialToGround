@@ -23,12 +23,13 @@ Usage
 
 Outputs
 -------
-  outputs/ckpts_gan/   — G_stepXXXXXXX.pt  +  D_stepXXXXXXX.pt  (last 3 kept)
-  outputs/dump_gan/    — montage JPEGs: [semantic | real ground | synthesised]
+  outputs/ckpts_gan/   — G_stepXXXXXXX.pt  +  D_stepXXXXXXX.pt  (rolling keep; weights-only by default)
+  outputs/dump_gan/    — optional montage JPEGs (--vis_every > 0)
 """
 
 import os
 import argparse
+import shutil
 import time
 import numpy as np
 from PIL import Image
@@ -82,8 +83,16 @@ def get_args():
     p.add_argument('--ckpt_dir',     default='outputs/ckpts_gan')
     p.add_argument('--dump_dir',     default='outputs/dump_gan')
     p.add_argument('--log_every',    type=int,   default=100)
-    p.add_argument('--vis_every',    type=int,   default=500)
+    p.add_argument('--vis_every',    type=int,   default=0,
+                   help='Montage JPG every N steps (0=off). Long SPADE runs: leave off.')
+    p.add_argument('--keep_vis',     type=int,   default=3,
+                   help='Max montage JPGs in dump_dir when vis_every>0 (older deleted).')
     p.add_argument('--save_every',   type=int,   default=2000)
+    p.add_argument('--epoch_ckpt',   action='store_true',
+                   help='Also save at end of each epoch (extra disk; usually unnecessary).')
+    p.add_argument('--full_ckpt',    action='store_true',
+                   help='Save Adam + GradScaler in checkpoints (~5× larger). '
+                        'Default saves model weights only (enough for resume + eval).')
     p.add_argument('--resume_g',     default='', help='Generator checkpoint to resume from.')
     p.add_argument('--resume_d',     default='', help='Discriminator checkpoint to resume from.')
     p.add_argument('--fresh_d_optimizer', action='store_true',
@@ -106,8 +115,8 @@ def get_args():
                         'Use ~4500 for a 2-epoch gan_v2_diag3 run.')
     p.add_argument('--aux_aerial', action='store_true',
                    help='SPADE only: warp aerial RGB (CSV col 0) as extra G conditioning.')
-    p.add_argument('--keep_ckpts', type=int, default=3,
-                   help='Rolling checkpoint retention per G/D (default 3).')
+    p.add_argument('--keep_ckpts', type=int, default=1,
+                   help='Rolling retention per G and per D (default 1). Prune before save.')
     return p.parse_args()
 
 
@@ -245,32 +254,65 @@ def generator_adv_loss(fake_scores: torch.Tensor) -> torch.Tensor:
 # Checkpoint helpers
 # ──────────────────────────────────────────────────────────────────────────────
 
+def _prune_files(ckpt_dir: str, prefix: str, suffix: str, keep_n: int) -> None:
+    """Delete oldest matching files until at most keep_n remain."""
+    if keep_n < 0:
+        return
+    files = sorted(
+        f for f in os.listdir(ckpt_dir)
+        if f.startswith(prefix) and f.endswith(suffix)
+    )
+    to_drop = files if keep_n == 0 else files[:-keep_n]
+    for old in to_drop:
+        try:
+            os.remove(os.path.join(ckpt_dir, old))
+        except OSError:
+            pass
+
+
+def _ckpt_free_gb(path: str) -> float:
+    try:
+        usage = shutil.disk_usage(os.path.abspath(path))
+        return usage.free / (1024 ** 3)
+    except OSError:
+        return float('inf')
+
+
 def save_checkpoints(G, D, opt_G, opt_D, scaler_G, scaler_D,
-                     step: int, epoch: int, ckpt_dir: str, keep: int = 3):
+                     step: int, epoch: int, ckpt_dir: str, keep: int = 1,
+                     *, full: bool = False):
     os.makedirs(ckpt_dir, exist_ok=True)
     tag = f'step{step:07d}'
+    keep_n = max(1, keep)
+
+    free_gb = _ckpt_free_gb(ckpt_dir)
+    if free_gb < 2.0:
+        print(f'    [ckpt] WARNING: only {free_gb:.1f} GB free on checkpoint volume')
 
     for prefix, model, opt, scaler in [
         ('G', G, opt_G, scaler_G), ('D', D, opt_D, scaler_D)
     ]:
-        path = os.path.join(ckpt_dir, f'{prefix}_{tag}.pt')
-        torch.save({
-            'step':      step,
-            'epoch':     epoch,
-            'model':     model.state_dict(),
-            'optimizer': opt.state_dict(),
-            'scaler':    scaler.state_dict(),
-        }, path)
-        # Keep only the last 3 checkpoints per model
-        ckpts = sorted(
-            f for f in os.listdir(ckpt_dir)
-            if f.startswith(prefix + '_') and f.endswith('.pt')
-        )
-        keep_n = max(1, keep)
-        for old in ckpts[:-keep_n]:
-            os.remove(os.path.join(ckpt_dir, old))
+        # Free space before writing (avoid peak = old + new full Adam states).
+        _prune_files(ckpt_dir, f'{prefix}_', '.pt', keep_n - 1)
+        _prune_files(ckpt_dir, f'{prefix}_', '.pt.tmp', 0)
 
-    print(f'    [ckpt] saved → {ckpt_dir}/{tag}')
+        payload = {
+            'step':  step,
+            'epoch': epoch,
+            'model': model.state_dict(),
+        }
+        if full:
+            payload['optimizer'] = opt.state_dict()
+            payload['scaler']    = scaler.state_dict()
+
+        path = os.path.join(ckpt_dir, f'{prefix}_{tag}.pt')
+        tmp  = path + '.tmp'
+        torch.save(payload, tmp)
+        os.replace(tmp, path)
+        _prune_files(ckpt_dir, f'{prefix}_', '.pt', keep_n)
+
+    mode = 'full' if full else 'weights-only'
+    print(f'    [ckpt] saved ({mode}, keep={keep_n}) → {ckpt_dir}/{tag}')
 
 
 def load_checkpoint(
@@ -284,9 +326,12 @@ def load_checkpoint(
 ):
     ck = torch.load(path, map_location=device, weights_only=False)
     model.load_state_dict(ck['model'])
-    if load_optimizer:
+    if load_optimizer and 'optimizer' in ck:
         opt.load_state_dict(ck['optimizer'])
+    if 'scaler' in ck:
         scaler.load_state_dict(ck['scaler'])
+    elif load_optimizer:
+        print(f'    [ckpt] {path}: weights-only — optimiser/scaler not restored')
     return ck['step'], ck['epoch']
 
 
@@ -311,7 +356,8 @@ def _tensor_to_uint8(t: torch.Tensor) -> np.ndarray:
 
 
 def save_visualisation(label: torch.Tensor, real: torch.Tensor,
-                       fake: torch.Tensor, step: int, dump_dir: str):
+                       fake: torch.Tensor, step: int, dump_dir: str,
+                       keep_vis: int = 3):
     """Save side-by-side: [semantic colour map | real ground | synthesised]."""
     lbl_np  = label[0].cpu().float().numpy()       # (C, H, W)
     cls_map = lbl_np.argmax(axis=0)                # (H, W)
@@ -327,6 +373,13 @@ def save_visualisation(label: torch.Tensor, real: torch.Tensor,
 
     os.makedirs(dump_dir, exist_ok=True)
     montage.save(os.path.join(dump_dir, f'{step:07d}.jpg'))
+    if keep_vis > 0:
+        jpgs = sorted(f for f in os.listdir(dump_dir) if f.endswith('.jpg'))
+        for old in jpgs[:-keep_vis]:
+            try:
+                os.remove(os.path.join(dump_dir, old))
+            except OSError:
+                pass
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -437,6 +490,9 @@ def train(args):
     print(f'[*] Est. total time  : {total_steps * sec_per_step / 3600:.1f} h  '
           f'(rough estimate; use --max_samples N to shorten)')
     print(f'[*] Healthy training : D_loss in [0.05–0.50], G_adv in [0.5–1.5]')
+    ckpt_note = 'full Adam+scaler' if args.full_ckpt else 'weights-only (~350MB/G for SPADE)'
+    print(f'[*] Checkpoints        : keep={args.keep_ckpts} per G/D, {ckpt_note}, '
+          f'vis={"off" if args.vis_every <= 0 else f"every {args.vis_every}"}')
     print()
 
     # ── Training ──────────────────────────────────────────────────────────────
@@ -556,14 +612,20 @@ def train(args):
                 )
 
             # ── Visualisation ─────────────────────────────────────────────────
-            if global_step % args.vis_every == 1:
+            if args.vis_every > 0 and global_step % args.vis_every == 0:
                 with torch.no_grad():
-                    save_visualisation(label, real_g, fake_g, global_step, args.dump_dir)
+                    save_visualisation(
+                        label, real_g, fake_g, global_step, args.dump_dir,
+                        keep_vis=args.keep_vis,
+                    )
 
             # ── Checkpoint ────────────────────────────────────────────────────
             if global_step % args.save_every == 0:
-                save_checkpoints(G, D, opt_G, opt_D, scaler_G, scaler_D,
-                                 global_step, epoch, args.ckpt_dir, args.keep_ckpts)
+                save_checkpoints(
+                    G, D, opt_G, opt_D, scaler_G, scaler_D,
+                    global_step, epoch, args.ckpt_dir, args.keep_ckpts,
+                    full=args.full_ckpt,
+                )
 
         # ── End-of-epoch ──────────────────────────────────────────────────────
         n_b      = max(len(dl), 1)
@@ -578,8 +640,12 @@ def train(args):
             f'time={dur/60:.1f} min  lr={cur_lr:.2e}\n'
         )
 
-        save_checkpoints(G, D, opt_G, opt_D, scaler_G, scaler_D,
-                         global_step, epoch + 1, args.ckpt_dir, args.keep_ckpts)
+        if args.epoch_ckpt:
+            save_checkpoints(
+                G, D, opt_G, opt_D, scaler_G, scaler_D,
+                global_step, epoch + 1, args.ckpt_dir, args.keep_ckpts,
+                full=args.full_ckpt,
+            )
 
     print('[*] GAN training complete.')
 
