@@ -1,0 +1,10 @@
+{
+  "gan_ckpt": "experiments/phase2/runs/spade_aerial_v2/ckpts/G_step0032000.pt",
+  "val_csv": "cvpr_val_v2.csv",
+  "n_images": 8884,
+  "generator_step": 32000,
+  "ssim": 0.5087884064939202,
+  "lpips": 0.5646894912041291,
+  "fid": 116.19223471961789,
+  "elapsed_sec": 518.47
+}
