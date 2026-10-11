@@ -1,5 +1,5 @@
 {
-  "note": "Stage-1 numbers under phase2/ are locked. Stage-2 Pix2Pix rows under stage2_pix2pix/ — append SPADE here when ready.",
+  "note": "Stage-1 numbers under phase2/ are locked. Stage-2 synthesis: Pix2Pix baseline + SPADE layout + SPADE+aerial (GT layouts on cvpr_val_v2, n=8884).",
   "palette": {
     "0": "sky",
     "1": "vegetation",
@@ -403,7 +403,56 @@
         "fid": 157.57484579165592
       }
     },
-    "stage2_best_for_paper": "gan_v2_random_d @ G_step0231066 (FID 157.6 vs warm-D retrain 164.4)"
+    "stage2_pix2pix_baseline": "gan_v2_random_d @ G_step0231066 (FID 157.6 vs warm-D retrain 164.4)"
+  },
+  "stage2_spade": {
+    "name": "SPADE — GT v2 semantic layout (+ optional warped aerial) to ground RGB (256x512)",
+    "protocol": "cvpr_val_v2.csv, n=8884, GT labels_v2/ground/, eval_gan_pix2pix.py (SSIM, LPIPS, FID)",
+    "training_defaults": {
+      "generator": "spade",
+      "lambda_l1": 10.0,
+      "lambda_perceptual": 10.0,
+      "random_init_d": true,
+      "g_steps": 3,
+      "batch_size": 16,
+      "epochs": 15,
+      "amp": true
+    },
+    "spade_v2": {
+      "run_dir": "experiments/phase2/runs/spade_v2/",
+      "log": "logs/spade_v2.txt",
+      "launch": "experiments/phase2/code/run_spade_v2.sh",
+      "finding": "Beats Pix2Pix FID 157.6; D_weak late training same as aerial run. Steps 31080/32000/33300 eval to same FID (duplicate saves of same weights).",
+      "val_full8884_v2": {
+        "source_file": "experiments/phase2/runs/spade_v2/val_metrics_0033300.json",
+        "gan_ckpt": "experiments/phase2/runs/spade_v2/ckpts/G_step0033300.pt",
+        "generator_step": 33300,
+        "ssim": 0.5068318591022208,
+        "lpips": 0.5909746456178444,
+        "fid": 129.65582489298964
+      }
+    },
+    "spade_aerial_v2": {
+      "run_dir": "experiments/phase2/runs/spade_aerial_v2/",
+      "log": "logs/spade_aerial_v2.txt",
+      "launch": "experiments/phase2/code/run_spade_aerial_v2.sh",
+      "aux_aerial": "Warped aerial RGB (CSV col 0) as extra SPADE conditioning; D unchanged (layout+RGB only)",
+      "training_note": "15 epochs total; resumed from G/D step 12000 (epoch 5) for remaining 10 epochs; final train step 34200, eval ckpt at save step 32000",
+      "val_full8884_v2": {
+        "source_file": "experiments/phase2/runs/spade_aerial_v2/val_metrics_32000.json",
+        "gan_ckpt": "experiments/phase2/runs/spade_aerial_v2/ckpts/G_step0032000.pt",
+        "generator_step": 32000,
+        "ssim": 0.5087884064939202,
+        "lpips": 0.5646894912041291,
+        "fid": 116.19223471961789
+      }
+    },
+    "fid_ladder_gt_layouts": {
+      "gan_v2_random_d": 157.57484579165592,
+      "spade_v2": 129.65582489298964,
+      "spade_aerial_v2": 116.19223471961789
+    },
+    "stage2_best_for_paper": "spade_aerial_v2 @ G_step0032000 (FID 116.2 vs layout SPADE 129.7 vs Pix2Pix 157.6)"
   },
   "do_not_compare_directly": "Baseline 0.45 mIoU is on old SegNet labels (trees often labeled building). Phase 1 0.40 is on SegFormer labels. Fair comparison is the 0.30 vs 0.40 pair on v2 labels."
 }

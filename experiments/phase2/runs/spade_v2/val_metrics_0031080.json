@@ -1,0 +1,10 @@
+{
+  "gan_ckpt": "experiments/phase2/runs/spade_v2/ckpts/G_step0031080.pt",
+  "val_csv": "cvpr_val_v2.csv",
+  "n_images": 8884,
+  "generator_step": 31080,
+  "ssim": 0.5068318591022208,
+  "lpips": 0.5909746456178444,
+  "fid": 129.65582489298964,
+  "elapsed_sec": 424.31
+}

@@ -1,22 +1,31 @@
 Stage 1 (PolarLayoutNet) — gitignored weights (local only):
   experiments/phase2/runs/polar_full/best.pt
 
-Stage 2 Pix2Pix — paper baseline (gitignored G/D):
+Stage 2 Pix2Pix — U-Net baseline (gitignored G/D):
   experiments/phase2/runs/gan_v2_random_d/ckpts/G_step0231066.pt
   experiments/phase2/runs/gan_v2_random_d/ckpts/D_step0231066.pt
-  (optional copy) experiments/phase2/gan_checkpoints/gan_v2_random_d/
 
-Stage 2 ablation — warm-started D collapse (negative result, same G step id):
-  experiments/phase2/runs/gan_v2_retrain/  (metrics in val_metrics_full.json; weights local/gitignored)
+Stage 2 ablation — warm-started D collapse:
+  experiments/phase2/runs/gan_v2_retrain/  (metrics: val_metrics_full.json)
 
-Warm-start generator (v1 labels, for all v2 GAN runs):
+Warm-start generator (v1 labels; Pix2Pix only, not SPADE):
   outputs/ckpts_gan/G_step0197766.pt
 
-Stage 2 SPADE (train next; gitignored G/D when done):
-  experiments/phase2/runs/spade_v2/ckpts/
-  Launch: experiments/phase2/code/run_spade_v2.sh
+Stage 2 SPADE — layout only (gitignored G/D):
+  experiments/phase2/runs/spade_v2/ckpts/G_step0033300.pt  (paper layout SPADE)
+  experiments/phase2/runs/spade_v2/ckpts/D_step0033300.pt
+  Also on disk: G/D @ steps 31080, 32000 (same eval FID as 33300)
 
-Eval metrics (tracked):
-  experiments/phase2/runs/gan_v2_random_d/val_metrics_full.json
-  experiments/phase2/runs/gan_v2_retrain/val_metrics_full.json
-  experiments/phase2/runs/spade_v2/val_metrics_full.json  (after eval)
+Stage 2 SPADE + warped aerial (gitignored G/D):
+  experiments/phase2/runs/spade_aerial_v2/ckpts/G_step0032000.pt  (best FID 116.2)
+  experiments/phase2/runs/spade_aerial_v2/ckpts/D_step0032000.pt
+
+Eval metrics (JSON):
+  experiments/phase2/runs/gan_v2_random_d/val_metrics_full.json   (FID 157.6)
+  experiments/phase2/runs/gan_v2_retrain/val_metrics_full.json    (FID 164.4)
+  experiments/phase2/runs/spade_v2/val_metrics_0033300.json       (FID 129.7)
+  experiments/phase2/runs/spade_aerial_v2/val_metrics_32000.json (FID 116.2)
+
+Launch scripts:
+  experiments/phase2/code/run_spade_v2.sh
+  experiments/phase2/code/run_spade_aerial_v2.sh
