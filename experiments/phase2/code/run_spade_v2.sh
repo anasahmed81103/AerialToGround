@@ -19,6 +19,9 @@ python -u train_gan_pix2pix.py \
   --batch_size "${BATCH:-8}" \
   --num_workers "${WORKERS:-4}" \
   --d_diag_max_steps "${D_DIAG:-300}" \
+  --keep_ckpts "${KEEP_CKPTS:-1}" \
+  --save_every "${SAVE_EVERY:-4000}" \
+  --vis_every 0 \
   --ckpt_dir "$OUT/ckpts" \
   --dump_dir "$OUT/dump" \
-  2>&1 | tee logs/spade_v2.txt
+  >> "logs/spade_v2.txt" 2>&1
