@@ -59,7 +59,7 @@ Round 3 — native head resolution (see `code/run_polar_full_64x320.ps1`):
 
 Architecture note: `PolarLayoutNet` has **no** fixed upsampling stages; `out_hw` sets `row_queries` (H), polar grid width W, and ground-plane prior shape directly. No code change required for 64x320.
 
-Round 4 — class-weighted loss (last Stage 1 experiment, pending RunPod):
+Round 4 — class-weighted loss (done):
 
 | Variant | Changed | mIoU | Impact |
 |---|---|---|---|
@@ -69,23 +69,25 @@ New modules: `phase2_class_weights.py`, `phase2_weighted_loss.py`. Launch: `expe
 
 ---
 
-## Stage 2 (Pix2Pix GAN) — done (baseline locked)
+## Stage 2 (layout → ground RGB) — done
 
 | Item | Choice |
 |------|--------|
 | Stage 1 layout for **paper / mIoU** | `polar_full/best.pt` (0.514) |
 | GAN **training** supervision | GT `labels_v2/ground/` + panos via `cvpr_train_v2.csv` |
 | GAN **demo / E2E** | `polar_full` predicted layouts at inference only |
-| G warm-start | `G_step0197766.pt` (v1 labels) |
-| **Paper Stage 2 ckpt** | **`gan_v2_random_d` → `G_step0231066.pt`** |
-| Metrics | `eval_gan_pix2pix.py` on full val (8,884) |
+| Pix2Pix G warm-start | `G_step0197766.pt` (v1 labels); SPADE trains **from scratch** |
+| **Paper Stage 2 ckpt** | **`spade_aerial_v2` → `G_step0032000.pt`** (FID **116.2**) |
+| Metrics | `eval_gan_pix2pix.py` on full val (8,884), GT layouts |
 
 ### Results (GT layouts, same val set)
 
 | Run | Setup | SSIM | LPIPS | FID |
 |-----|--------|------|-------|-----|
-| `gan_v2_retrain` | Warm **G+D**, g_steps=2 | 0.516 | 0.618 | **164.4** |
-| **`gan_v2_random_d`** | **Random D**, g_steps=3, 15 ep | **0.516** | **0.610** | **157.6** |
+| `gan_v2_retrain` | Pix2Pix, warm **G+D**, g_steps=2 | 0.516 | 0.618 | **164.4** |
+| `gan_v2_random_d` | Pix2Pix, random D, g_steps=3 | 0.516 | 0.610 | **157.6** |
+| `spade_v2` | SPADE, random D, λ_L1/VGG=10, 15 ep | 0.507 | 0.591 | **129.7** |
+| **`spade_aerial_v2`** | SPADE + **warped aerial** cond (`--aux_aerial`) | **0.509** | **0.565** | **116.2** |
 
 ### Diagnostic chain (why warm-D retrain failed)
 
@@ -104,26 +106,40 @@ python eval_gan_pix2pix.py --gan_ckpt experiments/phase2/runs/gan_v2_random_d/ck
   --out_json experiments/phase2/runs/gan_v2_random_d/val_metrics_full.json
 ```
 
-### Stage 2 upgrade — SPADE (in repo, train on RunPod)
+### SPADE layout-only (`spade_v2`)
 
 | Item | Choice |
 |------|--------|
-| Generator | `spade_model.SPADEGenerator` (`--generator spade`) |
-| Discriminator | Same PatchGAN as Pix2Pix |
-| Loss | LSGAN + **λ_L1=10** + **VGG perceptual=10** (defaults in `run_spade_v2.sh`) |
-| D training | **Random D**, **g_steps=3** (same lesson as `gan_v2_random_d`) |
-| G init | **From scratch** (do not load U-Net `G_step0197766`) |
-| Target | Beat Pix2Pix **FID 157.6** on full val |
+| Generator | `SPADEGenerator` (`--generator spade`) |
+| Loss | LSGAN + **λ_L1=10** + **VGG perceptual=10** |
+| D | **Random init**, **g_steps=3**, batch 16, 15 epochs (RunPod RTX 4090) |
+| Paper ckpt | **`G_step0033300.pt`** (steps 31080/32000/33300 same FID on val) |
+| Log / dumps | `logs/spade_v2.txt`, `runs/spade_v2/dump/` |
 
 ```bash
-bash experiments/phase2/code/run_spade_v2.sh
 python eval_gan_pix2pix.py --generator spade \
-  --gan_ckpt experiments/phase2/runs/spade_v2/ckpts/G_stepXXXXXXX.pt \
-  --val_csv cvpr_val_v2.csv --batch_size 4 \
-  --out_json experiments/phase2/runs/spade_v2/val_metrics_full.json
+  --gan_ckpt experiments/phase2/runs/spade_v2/ckpts/G_step0033300.pt \
+  --val_csv cvpr_val_v2.csv --batch_size 8 \
+  --out_json experiments/phase2/runs/spade_v2/val_metrics_0033300.json
 ```
 
-Local sanity: `python smoke_spade.py`
+### SPADE + aerial (`spade_aerial_v2`)
+
+| Item | Choice |
+|------|--------|
+| Extra conditioning | Warped aerial RGB (`aerial_warp.py`, `--aux_aerial`) |
+| Training | Same recipe as `spade_v2`; 15 epochs total (resume from step 12000) |
+| Paper ckpt | **`G_step0032000.pt`** (last saved step before train end at 34200) |
+| Log | `logs/spade_aerial_v2.txt` (no montage dumps; `vis_every=0`) |
+
+```bash
+python eval_gan_pix2pix.py --generator spade --aux_aerial \
+  --gan_ckpt experiments/phase2/runs/spade_aerial_v2/ckpts/G_step0032000.pt \
+  --val_csv cvpr_val_v2.csv --batch_size 8 \
+  --out_json experiments/phase2/runs/spade_aerial_v2/val_metrics_32000.json
+```
+
+Local sanity: `python smoke_spade.py`, `python smoke_spade_aerial.py`
 
 Paper one-liner for class-weighted (Stage 1): inverse-frequency loss improves building IoU (+0.03) but lowers mIoU (−0.013); main Stage 1 result stays unweighted `polar_full`.
 
