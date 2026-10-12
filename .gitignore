@@ -26,6 +26,9 @@ ENV/
 
 # ── Local data and run artifacts (never commit) ─────────────────────────────
 outputs/
+logs/
+test_pipeline_inputs/
+final_eval_results/
 cvpr_subset/
 data/
 cache/

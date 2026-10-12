@@ -1,0 +1,11 @@
+{
+  "note": "Six CVUSA val rows (bundled paths relative to repo root). Used by app.py.",
+  "tiles": [
+    {"idx": 0, "label": "val #0"},
+    {"idx": 1269, "label": "val #1269"},
+    {"idx": 2538, "label": "val #2538"},
+    {"idx": 3807, "label": "val #3807"},
+    {"idx": 5076, "label": "val #5076"},
+    {"idx": 6345, "label": "val #6345"}
+  ]
+}
