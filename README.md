@@ -11,7 +11,7 @@
 </p>
 <p align="center"><sub>Aerial · street pano · SegFormer GT map · <b>predicted</b> map (DINOv2 + column decoder, 1.5M params)</sub></p>
 
-### Stage 2 — best GAN (**SPADE + aerial**, **FID 116.2** on oracle layouts, `G_step0032000`)
+### Stage 2 — best GAN (**SPADE + aerial**, **FID<sub>clean</sub> 141.0** oracle / legacy Inception **116.2**, `G_step0032000`)
 
 <p align="center">
   <img src="assets/teaser/stage2_spade_aerial_layout_real_fake.jpg" alt="SPADE+aerial: semantic map, real panorama, synthesised panorama" width="100%"/>
@@ -38,9 +38,9 @@
 
 ---
 
-Built on a faithful **PyTorch reimplementation** of Zhai et al., *Predicting Ground-Level Scene Layout from Aerial Imagery* (CVPR 2017) [[paper]](http://openaccess.thecvf.com/content_cvpr_2017/papers/Zhai_Predicting_Ground-Level_Scene_CVPR_2017_paper.pdf) · [[arXiv]](https://arxiv.org/abs/1612.02709), then extended through **three research phases** on **CVUSA** (35,532 train / **8,884 test** pairs, SegFormer **v2** labels): stronger baselines, a **1.5M-parameter** DINOv2 polar layout head (**0.514 mIoU**), and **SPADE + warped aerial** synthesis with a **publication-grade eval ladder** (oracle vs predicted layout, clean-FID, bootstrap CIs).
+**Aerial2Ground** predicts ground-level semantic layout from a satellite tile (**PolarLayoutNet** on frozen DINOv2, **0.514 mIoU** on CVUSA) and synthesises a street panorama (**SPADE + warped aerial**). Built on a PyTorch reimplementation of Zhai et al. (CVPR 2017) [[paper]](http://openaccess.thecvf.com/content_cvpr_2017/papers/Zhai_Predicting_Ground-Level_Scene_CVPR_2017_paper.pdf), extended with SegFormer **v2** labels, ablations, and a **clean-FID** eval ladder (**141.0** oracle · **182.1** end-to-end, n=8884). Early **CrossNet + Pix2Pix** baselines remain under `legacy/` and `experiments/phase1/`.
 
-**Status (Oct 2025):** training and full validation eval **complete**. Headline **end-to-end** row: **Config E** (FID<sub>clean</sub> **182.1**, n=8884).
+**Status (2026):** training and full validation eval **complete**. Headline synthesis metrics use **clean-FID** (n=8884): **Config D** oracle **141.0**, **Config E** end-to-end **182.1**. Checkpoints: **[GitHub release v1.0.0](https://github.com/anasahmed81103/AerialToGround/releases/tag/v1.0.0)** + Zenodo DOI (see [Reproducibility](#reproducibility--release-v100)).
 
 ---
 
@@ -68,7 +68,8 @@ Built on a faithful **PyTorch reimplementation** of Zhai et al., *Predicting Gro
 - [Limitations & how to cite numbers](#limitations--how-to-cite-numbers)
 - [Literature context](#literature-context)
 - [Deployment & demos](#deployment--demos)
-- [Citation](#citation)
+- [Reproducibility & release v1.0.0](#reproducibility--release-v100)
+- [Citation & license](#citation--license)
 
 ---
 
@@ -76,11 +77,13 @@ Built on a faithful **PyTorch reimplementation** of Zhai et al., *Predicting Gro
 
 All layout metrics: **full test set** n=**8884**, `cvpr_val_v2.csv`, 4 classes (sky · vegetation · road · building), upsampled to **224×1232** for mIoU unless noted.
 
-| Stage | Best model | Key metric | vs fair CrossNet baseline (v2) |
-|-------|------------|------------|--------------------------------|
-| **Stage 1** | **PolarLayoutNet** `polar_full` | **mIoU 0.514** | +0.215 (+72% rel.) vs 0.299 |
-| **Stage 2 (oracle layout)** | **SPADE + aerial** `spade_aerial_v2` | **FID 116.2** (legacy Inception) | −41 FID vs Pix2Pix 157.6 |
-| **End-to-end (paper row)** | **Config E** pred layout + SPADE + aerial | **FID<sub>clean</sub> 182.1** | Stage-1 error dominates vs oracle 141.0 |
+| Stage | Best model | Key metric (clean-FID unless noted) | Notes |
+|-------|------------|-------------------------------------|--------|
+| **Stage 1** | **PolarLayoutNet** `polar_full` | **mIoU 0.514** @ 8884 | +0.215 vs fair CrossNet on v2 (0.299) |
+| **Stage 2 oracle** | **Config D** SPADE + aerial, GT layout | **FID<sub>clean</sub> 141.0** | Upper-bound synthesis; same ckpt as E |
+| **End-to-end** | **Config E** pred layout + SPADE + aerial | **FID<sub>clean</sub> 182.1** | **+41 FID** vs D (layout error) |
+
+<sup>Legacy val FID (torchvision Inception, GT layout): Pix2Pix 157.6 → SPADE 129.7 → SPADE+aerial **116.2** — do not compare directly to clean-FID columns above.</sup>
 
 <details>
 <summary><b>Config E synthesis metrics (n=8884, clean-FID harness)</b></summary>
@@ -126,7 +129,7 @@ Phase 2 Stage 1 — frozen DINOv2 + full tile + PolarLayoutNet (~1.5M params)
 Phase 2 Stage 2 — SPADE / Pix2Pix on GT layouts; best SPADE+aerial FID 116.2
     │  Trained with oracle maps; E2E uses predicted layout at test
     ▼
-Final eval — configs A→E, clean-FID, bootstrap CIs (Oct 2025, DONE)
+Final eval — configs A→E, clean-FID, bootstrap CIs (2026, DONE)
 ```
 
 | Phase | What changed | Outcome |
@@ -400,10 +403,11 @@ Two different questions:
 
 | Comparison | Δ FID | Interpretation |
 |------------|-------|----------------|
-| **D − E** (oracle − E2E, same SPADE+aerial) | **141.0 → 182.1 (−41)** | Layout prediction error dominates |
-| **B − C** (remove aerial, pred layout) | 155.4 vs 195.0 (oracle) / paired **E−C** LPIPS **−0.021** | Warped aerial helps **with pred layout too** |
-| **A − B** (Pix2Pix → SPADE, GT layout) | 167.4 → 155.4 | SPADE wins under oracle |
-| **D − B** (add aerial, GT layout) | 155.4 → 141.0; LPIPS **−0.026** | Aerial aux strongest under oracle |
+| **E vs D** (E2E vs oracle, same SPADE+aerial) | **141.0 → 182.1 (+41 on E)** | Layout prediction error dominates photorealism |
+| **C → E** (add aerial aux, **predicted** layout) | **195.0 → 182.1 (−13)**; LPIPS **−0.021** (bootstrap) | Warped aerial helps on **pred** layouts |
+| **B → D** (add aerial aux, **GT** layout) | **155.4 → 141.0 (−14)**; LPIPS **−0.026** | Aerial aux under oracle |
+| **B vs C** (oracle vs **predicted** layout, no aerial) | 155.4 vs 195.0 | Layout quality only (not an aerial on/off pair) |
+| **A → B** (Pix2Pix → SPADE, GT layout) | 167.4 → 155.4 | SPADE wins under oracle |
 
 ### Legacy vs clean-FID (same models, different FID code)
 
@@ -700,9 +704,43 @@ python pipeline.py --aerial demo/sample_aerial_road.jpg --out outputs/cloud_run/
 
 ---
 
-## Citation
+## Reproducibility & release v1.0.0
 
-Original method:
+| Artifact | Where |
+|----------|--------|
+| **Code** | Tag [`v1.0.0`](https://github.com/anasahmed81103/AerialToGround/releases/tag/v1.0.0) on this repo |
+| **Weights (~1 GB uncompressed, ~0.4 GB zipped)** | Zenodo bundle on the GitHub release (enable [Zenodo–GitHub integration](https://docs.zenodo.org/guides/github/) for DOI) |
+| **Metrics** | `experiments/final_eval/*_metrics.json`, `experiments/results_table.json` |
+| **Dataset** | **CVUSA** — separate [access terms](https://mvrl.cse.wustl.edu/datasets/cvusa/); not redistributed here |
+
+**Zenodo checkpoint bundle (minimum for `pipeline.py` + Config E):**
+
+| File | Role |
+|------|------|
+| `experiments/phase2/runs/polar_full/best.pt` | Stage 1 |
+| `experiments/phase2/runs/spade_aerial_v2/ckpts/G_step0032000.pt` | Stage 2 E2E / D / E |
+
+Optional ladder ckpts: `spade_v2/G_step0033300.pt`, `gan_v2_random_d/G_step0231066.pt`. Full manifest: [`docs/ZENODO_v1.0.0.md`](docs/ZENODO_v1.0.0.md).
+
+After download, extract so paths match [`experiments/phase2/MODELS.txt`](experiments/phase2/MODELS.txt), then run `python pipeline.py …` or `bash experiments/phase2/code/run_final_eval_full.sh`.
+
+---
+
+## Citation & license
+
+**This repository (software + reported numbers):** see [`CITATION.cff`](CITATION.cff) (Zenodo DOI after release).
+
+```bibtex
+@software{ahmed2026aerial2ground,
+  author    = {Ahmed, Anas},
+  title     = {Aerial2Ground: DINOv2 Polar Layout and SPADE Aerial Synthesis for CVUSA},
+  year      = {2026},
+  url       = {https://github.com/anasahmed81103/AerialToGround},
+  version   = {1.0.0}
+}
+```
+
+**Baseline method (CrossNet):**
 
 ```bibtex
 @inproceedings{zhai2017predicting,
@@ -713,11 +751,15 @@ Original method:
 }
 ```
 
+**License:** [MIT](LICENSE) for this repo’s code. **CVUSA** images and your trained weights follow the dataset’s and your institution’s terms. Third-party models (DINOv2, SegFormer) retain their respective licenses.
+
+**Suggested GitHub “About” description:** `CVUSA aerial→ground: DINOv2 PolarLayoutNet (0.514 mIoU) + SPADE+aerial. clean-FID 182.1 E2E / 141.0 oracle. PyTorch.`
+
 ---
 
 <p align="center">
   <sub>
     <b>Anas Ahmed</b> — Computer Vision (Semester 8, 2026)<br/>
-    PyTorch reimplementation &amp; Phase 2 research extension · University project · Results locked in <code>experiments/results_table.json</code>
+    University project · Results locked in <code>experiments/results_table.json</code>
   </sub>
 </p>

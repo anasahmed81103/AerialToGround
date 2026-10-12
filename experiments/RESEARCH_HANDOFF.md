@@ -4,7 +4,7 @@
 **Task:** CVUSA-style **aerial tile → ground-view semantic layout → synthesised ground RGB panorama**  
 **Dataset:** CVUSA subset in repo via CSVs; **35,532 train / 8,884 val** pairs in `cvpr_train_v2.csv` / `cvpr_val_v2.csv`  
 **Labels (v2):** SegFormer-ADE20K pseudo-labels on panos + aligned maps in `labels_v2/` (4 classes: sky, vegetation, road, building)  
-**Status (Oct 2025):** **Training complete.** **Final publication eval complete** (`final_eval.py`, all 5 configs + bootstrap). **No further GPU training planned.**
+**Status (2026):** **Training complete.** **Final publication eval complete** (`final_eval.py`, all 5 configs + bootstrap). **No further GPU training planned.**
 
 ---
 
@@ -126,7 +126,7 @@ Pipeline:
 
 ---
 
-## 4. Final publication eval (Oct 2025 — DONE)
+## 4. Final publication eval (2026 — DONE)
 
 ### 4.1 Harness
 
@@ -264,4 +264,4 @@ Given all of the above:
 
 ---
 
-*Generated for handoff Oct 2025. Source of truth for numbers: `experiments/final_eval/*_metrics.json`, `bootstrap_ci.json`, `experiments/results_table.json`.*
+*Generated for handoff 2026. Source of truth for numbers: `experiments/final_eval/*_metrics.json`, `bootstrap_ci.json`, `experiments/results_table.json`.*

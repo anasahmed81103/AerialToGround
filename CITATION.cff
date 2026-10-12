@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+title: "Aerial2Ground: DINOv2 Polar Layout and SPADE Aerial Synthesis for CVUSA"
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+authors:
+  - family-names: Ahmed
+    given-names: Anas
+repository-code: "https://github.com/anasahmed81103/AerialToGround"
+url: "https://github.com/anasahmed81103/AerialToGround"
+license: MIT
+version: 1.0.0
+date-released: 2026-10-13
+keywords:
+  - cross-view synthesis
+  - aerial imagery
+  - semantic layout
+  - CVUSA
+  - SPADE
+  - DINOv2
+abstract: >-
+  PyTorch pipeline for CVUSA-style aerial-to-ground synthesis: frozen DINOv2
+  PolarLayoutNet (0.514 mIoU) and SPADE with warped aerial conditioning.
+  Publication metrics use clean-FID (Config D oracle 141.0, Config E end-to-end 182.1, n=8884).
+preferred-citation:
+  type: software
+  title: "Aerial2Ground: DINOv2 Polar Layout and SPADE Aerial Synthesis for CVUSA"
+  authors:
+    - family-names: Ahmed
+      given-names: Anas
+  year: 2026
+  version: 1.0.0
+  url: "https://github.com/anasahmed81103/AerialToGround"
+notes: >-
+  CVUSA image data is not included; obtain under the dataset's own terms at
+  https://mvrl.cse.wustl.edu/datasets/cvusa/ . Trained checkpoints are distributed
+  via Zenodo (see GitHub release v1.0.0). Baseline CrossNet follows Zhai et al., CVPR 2017.

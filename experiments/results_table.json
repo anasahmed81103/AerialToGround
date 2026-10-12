@@ -456,7 +456,7 @@
   },
   "do_not_compare_directly": "Baseline 0.45 mIoU is on old SegNet labels (trees often labeled building). Phase 1 0.40 is on SegFormer labels. Fair comparison is the 0.30 vs 0.40 pair on v2 labels.",
   "final_eval_publication": {
-    "name": "Publication ladder — final_eval.py on full val n=8884 (clean-FID, Oct 2025)",
+    "name": "Publication ladder — final_eval.py on full val n=8884 (clean-FID, 2026)",
     "harness": "final_eval.py + bootstrap_ci.py (1000-image bootstrap, seed 0)",
     "layout_pred_ckpt": "experiments/phase2/runs/polar_full/best.pt",
     "metrics_note": "FID/KID via clean-fid (mode=clean). Legacy Stage-2 FID used torchvision Inception — do not mix columns without a footnote.",
