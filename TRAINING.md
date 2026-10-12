@@ -1,5 +1,8 @@
 # CrossViewNet — Full Training Guide
 
+> **Phase 2 (current research pipeline):** use repo-root `train_polar.py` + `train_gan_pix2pix.py`, and `experiments/phase2/README.md` / `MODELS.txt`.  
+> **This document** describes the **legacy Phase 1 CrossNet + v1 Pix2Pix** path (`legacy/phase1_v1/`).
+
 Complete walkthrough from dataset preparation to evaluating a trained model.
 
 ---

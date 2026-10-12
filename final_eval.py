@@ -249,7 +249,31 @@ def ensure_real_pngs(
     return real_dir
 
 
+def _patch_cleanfid_scipy_sqrtm() -> None:
+    """clean-fid calls scipy.linalg.sqrtm(..., disp=False); SciPy 1.14+ dropped disp."""
+    import inspect
+
+    import scipy.linalg as la
+
+    if getattr(la, '_a2g_cleanfid_patch', False):
+        return
+    sig = inspect.signature(la.sqrtm)
+    if 'disp' in sig.parameters:
+        return
+    orig = la.sqrtm
+
+    def sqrtm(a, disp=False):  # noqa: ARG001
+        r = orig(a)
+        if isinstance(r, tuple):
+            return r
+        return r, None
+
+    la.sqrtm = sqrtm
+    la._a2g_cleanfid_patch = True
+
+
 def compute_clean_fid_kid(gen_dir: str, real_dir: str, device: torch.device) -> dict:
+    _patch_cleanfid_scipy_sqrtm()
     try:
         from cleanfid import fid as clean_fid
     except ImportError as e:

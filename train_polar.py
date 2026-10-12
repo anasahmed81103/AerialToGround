@@ -29,9 +29,9 @@ from torch.utils.data import DataLoader, Dataset
 from polar_layout_model import PolarLayoutNet
 from semantic_metrics import CLASS_NAMES, ConfusionMeter, colorize_label
 from phase2_class_weights import format_weights, inverse_frequency_weights, parse_class_weights
+from phase2_weighted_loss import dice_loss, focal_ce
 from phase2_weighted_loss import dice_loss as dice_loss_w
 from phase2_weighted_loss import focal_ce as focal_ce_w
-from train_crossnet import dice_loss, focal_ce
 
 
 def get_args():

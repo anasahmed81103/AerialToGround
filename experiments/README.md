@@ -1,6 +1,8 @@
 # Experiments — research showcase archive
 
-This folder freezes **baseline** and **Phase 1** so later work cannot overwrite them.
+**Full narrative, tables, and visuals:** see the repo **[README](../README.md)** and **[RESEARCH_HANDOFF.md](RESEARCH_HANDOFF.md)**. Locked metrics: **[results_table.json](results_table.json)** (includes `final_eval_publication`).
+
+This folder freezes **baseline** and **Phase 1** code snapshots; **Phase 2** lives at repo root + `phase2/` (runs, `MODELS.txt`, `final_eval/`).
 
 | | Baseline (original) | Phase 1 (current improvement) |
 |---|---|---|

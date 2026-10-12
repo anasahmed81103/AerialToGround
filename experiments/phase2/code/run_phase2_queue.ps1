@@ -1,11 +1,11 @@
 # Sequential GPU queue: fair full-test evals of old models, then Phase 2 ablations.
 $ErrorActionPreference = 'Continue'
 
-python -u eval_crossnet.py --ckpt experiments\baseline\checkpoints\crossnet_step0088830.pt `
+python -u experiments\phase1\code\eval_crossnet.py --ckpt experiments\baseline\checkpoints\crossnet_step0088830.pt `
     --val_csv cvpr_val_v2.csv --no_amp --save_n 4 `
     --dump_dir experiments\baseline\results\eval_v2_labels_full8884
 
-python -u eval_crossnet.py --ckpt experiments\phase1\checkpoints\crossnet_best.pt `
+python -u experiments\phase1\code\eval_crossnet.py --ckpt experiments\phase1\checkpoints\crossnet_best.pt `
     --val_csv cvpr_val_v2.csv --no_amp --save_n 4 `
     --dump_dir experiments\phase1\results\eval_v2_labels_full8884
 

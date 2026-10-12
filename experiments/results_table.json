@@ -454,5 +454,71 @@
     },
     "stage2_best_for_paper": "spade_aerial_v2 @ G_step0032000 (FID 116.2 vs layout SPADE 129.7 vs Pix2Pix 157.6)"
   },
-  "do_not_compare_directly": "Baseline 0.45 mIoU is on old SegNet labels (trees often labeled building). Phase 1 0.40 is on SegFormer labels. Fair comparison is the 0.30 vs 0.40 pair on v2 labels."
+  "do_not_compare_directly": "Baseline 0.45 mIoU is on old SegNet labels (trees often labeled building). Phase 1 0.40 is on SegFormer labels. Fair comparison is the 0.30 vs 0.40 pair on v2 labels.",
+  "final_eval_publication": {
+    "name": "Publication ladder — final_eval.py on full val n=8884 (clean-FID, Oct 2025)",
+    "harness": "final_eval.py + bootstrap_ci.py (1000-image bootstrap, seed 0)",
+    "layout_pred_ckpt": "experiments/phase2/runs/polar_full/best.pt",
+    "metrics_note": "FID/KID via clean-fid (mode=clean). Legacy Stage-2 FID used torchvision Inception — do not mix columns without a footnote.",
+    "configs": {
+      "E": {
+        "slug": "spade_aerial_v2_pred",
+        "description": "End-to-end headline row: predicted layout + SPADE + warped aerial",
+        "ssim": 0.459,
+        "psnr": 14.82,
+        "lpips": 0.65,
+        "fid_clean": 182.1,
+        "kid": 0.209
+      },
+      "C": {
+        "slug": "spade_v2_pred",
+        "description": "Predicted layout, SPADE, no aerial aux",
+        "ssim": 0.458,
+        "psnr": 14.65,
+        "lpips": 0.671,
+        "fid_clean": 195.0,
+        "kid": 0.221
+      },
+      "D": {
+        "slug": "spade_aerial_v2_gt",
+        "description": "Oracle layout + SPADE + warped aerial",
+        "ssim": 0.509,
+        "psnr": 17.28,
+        "lpips": 0.565,
+        "fid_clean": 141.0,
+        "kid": 0.163
+      },
+      "B": {
+        "slug": "spade_v2_gt",
+        "description": "Oracle layout, SPADE only",
+        "ssim": 0.507,
+        "psnr": 17.06,
+        "lpips": 0.591,
+        "fid_clean": 155.4,
+        "kid": 0.179
+      },
+      "A": {
+        "slug": "pix2pix_random_d_gt",
+        "description": "Oracle layout, Pix2Pix U-Net baseline",
+        "ssim": 0.516,
+        "psnr": 17.07,
+        "lpips": 0.61,
+        "fid_clean": 167.4,
+        "kid": 0.18
+      }
+    },
+    "paired_bootstrap_95ci": {
+      "E_minus_C_aerial_on_pred_layout": {
+        "lpips_delta": -0.021,
+        "note": "CI excludes 0 — aerial aux helps even with noisy predicted layout"
+      },
+      "D_minus_B_aerial_on_gt_layout": {
+        "lpips_delta": -0.026,
+        "fid_clean": "141 vs 155",
+        "note": "CI excludes 0 — aerial aux helps under oracle layout"
+      }
+    },
+    "artifacts_dir": "experiments/final_eval/",
+    "full_metrics_glob": "experiments/final_eval/*_metrics.json"
+  }
 }
