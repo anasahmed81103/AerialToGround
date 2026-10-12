@@ -420,7 +420,7 @@ Configs **A/B/D** use **oracle** pano segmentation → **SSIM ~0.51** is **not**
 
 ## Visual results & live demo outputs
 
-The **top of this README** is a short teaser (one best example per stage). Below is a **full gallery** — Phase 1 baseline, Phase 2 layout/GAN training dumps, live `pipeline.py` runs, and fixed **Config E** eval montages. All curated files: [`assets/gallery/`](assets/gallery/README.md).
+The **top of this README** is a short teaser (one best example per stage). Below is a **full gallery** — Phase 1 baseline, Phase 2 layout/GAN training dumps, and live `pipeline.py` runs. Curated files: [`assets/gallery/`](assets/gallery/README.md). Publication **metrics** (Config A–E) live in [`experiments/final_eval/`](experiments/final_eval/) as JSON/NPZ — no montage figures here.
 
 ---
 
@@ -517,25 +517,6 @@ Full intermediate strip (val **500**): aerial · layout · warp · pano.
 ```bash
 python pipeline.py --aerial test_pipeline_inputs/aerial_00500.jpg --out outputs/dataset_pipeline_test/idx_00500
 ```
-
----
-
-### Publication eval — Config **E** montages (`final_eval.py`)
-
-Fixed **24** validation indices from the full **8884**-image run (same harness as paper tables). Each PNG: **aerial · pred layout · warp · fake · real**.
-
-<p align="center">
-  <img src="assets/gallery/final_eval/config_e_00000.png" width="49%" alt="Final eval Config E sample 0"/>
-  &nbsp;
-  <img src="assets/gallery/final_eval/config_e_00024.png" width="49%" alt="Final eval Config E sample 24"/>
-</p>
-<p align="center">
-  <img src="assets/gallery/final_eval/config_e_00046.png" width="49%" alt="Final eval Config E sample 46"/>
-  &nbsp;
-  <img src="assets/gallery/final_eval/config_e_00063.png" width="49%" alt="Final eval Config E sample 63"/>
-</p>
-
-<p align="center"><sub>Full set: <code>experiments/final_eval/spade_aerial_v2_pred_samples/*.png</code> · metrics: <code>*_metrics.json</code>, <code>bootstrap_ci.json</code>.</sub></p>
 
 ---
 
