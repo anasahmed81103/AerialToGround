@@ -420,31 +420,16 @@ Configs **A/B/D** use **oracle** pano segmentation → **SSIM ~0.51** is **not**
 
 ## Visual results & live demo outputs
 
-**Hero figures** (top of README) live in [`assets/teaser/`](assets/teaser/README.md) — best Stage-1 showcase, lowest-FID Stage-2 dump, and E2E val-500 run.
+The **top of this README** is a short teaser (one best example per stage). Below is a **full gallery** — Phase 1 baseline, Phase 2 layout/GAN training dumps, live `pipeline.py` runs, and fixed **Config E** eval montages. All curated files: [`assets/gallery/`](assets/gallery/README.md).
 
-**Regenerate E2E val 500:**
+---
 
-```bash
-python pipeline.py --aerial test_pipeline_inputs/aerial_00500.jpg --out outputs/dataset_pipeline_test/idx_00500
-```
+### Phase 1 — CrossNet + v1 Pix2Pix (baseline semester)
 
-### Batch eval montages (Config E, n=8884 harness)
+Five-sample grid: aerial → CrossNet semantic map → Pix2Pix panorama → CVUSA ground truth.
 
 <p align="center">
-  <img src="experiments/final_eval/spade_aerial_v2_pred_samples/00000.png" width="48%" alt="E2E eval montage idx 0"/>
-  &nbsp;
-  <img src="experiments/final_eval/spade_aerial_v2_pred_samples/00046.png" width="48%" alt="E2E eval montage idx 46"/>
-</p>
-
-<p align="center"><em>24 fixed validation montages in <code>experiments/final_eval/spade_aerial_v2_pred_samples/</code> (same panel layout as <code>final_eval.py</code>).</em></p>
-
-<details>
-<summary><b>Phase 1 — CrossNet + v1 Pix2Pix (early semester baseline)</b></summary>
-
-### Phase 1 — CrossNet + v1 Pix2Pix (historical showcase)
-
-<p align="center">
-  <img src="assets/results_grid_labeled.png" alt="Phase 1: aerial | CrossNet map | GAN panorama | ground truth" width="100%"/>
+  <img src="assets/gallery/phase1/crossnet_gan_grid.png" alt="Phase 1 five-sample results grid" width="100%"/>
 </p>
 
 | Colour | Class |
@@ -454,15 +439,103 @@ python pipeline.py --aerial test_pipeline_inputs/aerial_00500.jpg --out outputs/
 | Blue | Road |
 | Yellow | Building |
 
-### GAN training progression (Pix2Pix v1)
+Pix2Pix training progression (v1 labels; generator later warm-starts Phase 2 Pix2Pix):
 
 <p align="center">
-  <img src="assets/training_progress.png" width="100%"/>
+  <img src="assets/gallery/phase1/pix2pix_training_progress.png" alt="GAN training progression" width="100%"/>
 </p>
 
-<p align="center"><em>Left: step 1 · Centre: ~100k steps · Right: ~197k steps (<code>G_step0197766</code> warm-start for Phase 2 Pix2Pix).</em></p>
+<p align="center"><sub>Step 1 → ~100k → ~197k steps (<code>G_step0197766</code>).</sub></p>
 
-</details>
+---
+
+### Phase 2 — Stage 1 layout (`polar_full`, test showcases)
+
+Each panel grid: **aerial · GT street pano · GT SegFormer map · predicted map** (full val test indices 0–7).
+
+<p align="center">
+  <img src="assets/gallery/phase2_stage1/polar_full_test_0000.jpg" width="49%" alt="Polar layout showcase test 0"/>
+  &nbsp;
+  <img src="assets/gallery/phase2_stage1/polar_full_test_0003.jpg" width="49%" alt="Polar layout showcase test 3"/>
+</p>
+<p align="center">
+  <img src="assets/gallery/phase2_stage1/polar_full_test_0005.jpg" width="49%" alt="Polar layout showcase test 5"/>
+  &nbsp;
+  <img src="assets/gallery/phase2_stage1/polar_full_test_0007.jpg" width="49%" alt="Polar layout showcase test 7"/>
+</p>
+
+<p align="center"><sub>From <code>experiments/phase2/runs/polar_full/showcase/</code> @ <b>0.514 mIoU</b>.</sub></p>
+
+---
+
+### Phase 2 — Stage 2 synthesis (GT layout training dumps)
+
+Side-by-side montages from validation: **semantic map · real pano · generated pano** (checkpoints chosen by **lowest val FID**).
+
+| Model | FID (legacy val) | Gallery |
+|-------|------------------|---------|
+| Pix2Pix `gan_v2_random_d` | 157.6 | below |
+| SPADE `spade_v2` | 129.7 | below |
+| **SPADE + aerial** `spade_aerial_v2` | **116.2** | below |
+
+<p align="center">
+  <img src="assets/gallery/phase2_stage2/pix2pix_fid158.jpg" width="32%" alt="Pix2Pix dump"/>
+  &nbsp;
+  <img src="assets/gallery/phase2_stage2/spade_layout_only_fid130.jpg" width="32%" alt="SPADE layout-only dump"/>
+  &nbsp;
+  <img src="assets/gallery/phase2_stage2/spade_aerial_fid116.jpg" width="32%" alt="SPADE+aerial dump"/>
+</p>
+
+<p align="center"><sub>Oracle layouts at train time; same G checkpoints as Configs A/B/D/E.</sub></p>
+
+---
+
+### Phase 2 — End-to-end `pipeline.py` (predicted layout + SPADE + aerial)
+
+**Aerial · generated · ground truth** — no GT layout fed to the network.
+
+<p align="center">
+  <img src="assets/gallery/phase2_e2e/compare_val_00000.png" width="49%" alt="E2E val row 0"/>
+  &nbsp;
+  <img src="assets/gallery/phase2_e2e/compare_val_00100.png" width="49%" alt="E2E val row 100"/>
+</p>
+<p align="center">
+  <img src="assets/gallery/phase2_e2e/compare_val_00500.png" width="49%" alt="E2E val row 500"/>
+  &nbsp;
+  <img src="assets/gallery/phase2_e2e/compare_val_01269.png" width="49%" alt="E2E val row 1269"/>
+</p>
+<p align="center">
+  <img src="assets/gallery/phase2_e2e/compare_val_03807.png" width="70%" alt="E2E val row 3807"/>
+</p>
+
+Full intermediate strip (val **500**): aerial · layout · warp · pano.
+
+<p align="center">
+  <img src="assets/gallery/phase2_e2e/montage_val_00500.png" width="100%"/>
+</p>
+
+```bash
+python pipeline.py --aerial test_pipeline_inputs/aerial_00500.jpg --out outputs/dataset_pipeline_test/idx_00500
+```
+
+---
+
+### Publication eval — Config **E** montages (`final_eval.py`)
+
+Fixed **24** validation indices from the full **8884**-image run (same harness as paper tables). Each PNG: **aerial · pred layout · warp · fake · real**.
+
+<p align="center">
+  <img src="assets/gallery/final_eval/config_e_00000.png" width="49%" alt="Final eval Config E sample 0"/>
+  &nbsp;
+  <img src="assets/gallery/final_eval/config_e_00024.png" width="49%" alt="Final eval Config E sample 24"/>
+</p>
+<p align="center">
+  <img src="assets/gallery/final_eval/config_e_00046.png" width="49%" alt="Final eval Config E sample 46"/>
+  &nbsp;
+  <img src="assets/gallery/final_eval/config_e_00063.png" width="49%" alt="Final eval Config E sample 63"/>
+</p>
+
+<p align="center"><sub>Full set: <code>experiments/final_eval/spade_aerial_v2_pred_samples/*.png</code> · metrics: <code>*_metrics.json</code>, <code>bootstrap_ci.json</code>.</sub></p>
 
 ---
 
