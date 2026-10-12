@@ -4,13 +4,26 @@
   <b>From a satellite tile alone: predict ground-level semantics and synthesise a street panorama.</b>
 </p>
 
-<p align="center">
-  <img src="assets/pipeline_strip.png" alt="Phase 2 pipeline: aerial tile, predicted layout, warped aerial, SPADE panorama vs ground truth" width="100%"/>
-</p>
+### Stage 1 — best layout head (`polar_full`, **0.514 mIoU** @ 8884)
 
 <p align="center">
-  <em>Phase 2 end-to-end (Config&nbsp;E): aerial input → PolarLayoutNet → warped nadir RGB → SPADE generator → synthesised panorama (vs CVUSA ground truth).</em>
+  <img src="assets/teaser/stage1_polar_layout.jpg" alt="PolarLayoutNet showcase: aerial, ground truth pano, GT semantics, predicted semantics" width="100%"/>
 </p>
+<p align="center"><sub>Aerial · street pano · SegFormer GT map · <b>predicted</b> map (DINOv2 + column decoder, 1.5M params)</sub></p>
+
+### Stage 2 — best GAN (**SPADE + aerial**, **FID 116.2** on oracle layouts, `G_step0032000`)
+
+<p align="center">
+  <img src="assets/teaser/stage2_spade_aerial_layout_real_fake.jpg" alt="SPADE+aerial: semantic map, real panorama, synthesised panorama" width="100%"/>
+</p>
+<p align="center"><sub>GT layout · real CVUSA pano · <b>generated</b> pano (lowest-FID Stage-2 checkpoint, val montage)</sub></p>
+
+### End-to-end pipeline (**Config E** — predicted layout + SPADE + aerial)
+
+<p align="center">
+  <img src="assets/teaser/e2e_aerial_gen_gt_val500.png" alt="E2E val row 500: aerial input, generated panorama, ground truth" width="100%"/>
+</p>
+<p align="center"><sub>CVUSA val row 500 · <code>pipeline.py</code> · no GT layout at inference</sub></p>
 
 <p align="center">
   <a href="#headline-results">Results</a> ·
@@ -407,23 +420,13 @@ Configs **A/B/D** use **oracle** pano segmentation → **SSIM ~0.51** is **not**
 
 ## Visual results & live demo outputs
 
-### Live `pipeline.py` — CVUSA val row **500** (Config E checkpoints)
+**Hero figures** (top of README) live in [`assets/teaser/`](assets/teaser/README.md) — best Stage-1 showcase, lowest-FID Stage-2 dump, and E2E val-500 run.
 
-Full E2E montage: aerial · predicted layout · warped nadir · generated panorama.
+**Regenerate E2E val 500:**
 
-<p align="center">
-  <img src="assets/demo/montage_val_00500.png" alt="E2E montage val row 500: aerial, layout, warp, generated pano" width="100%"/>
-</p>
-
-Same tile: **aerial · generated · ground truth** (GT pano not used at inference).
-
-<p align="center">
-  <img src="assets/demo/compare_val_00500.png" alt="Val 500: aerial, generated panorama, ground truth" width="100%"/>
-</p>
-
-<p align="center">
-  <em>Regenerate: <code>python pipeline.py --aerial test_pipeline_inputs/aerial_00500.jpg --out outputs/dataset_pipeline_test/idx_00500</code> — see <code>assets/demo/README.md</code>.</em>
-</p>
+```bash
+python pipeline.py --aerial test_pipeline_inputs/aerial_00500.jpg --out outputs/dataset_pipeline_test/idx_00500
+```
 
 ### Batch eval montages (Config E, n=8884 harness)
 
@@ -435,11 +438,8 @@ Same tile: **aerial · generated · ground truth** (GT pano not used at inferenc
 
 <p align="center"><em>24 fixed validation montages in <code>experiments/final_eval/spade_aerial_v2_pred_samples/</code> (same panel layout as <code>final_eval.py</code>).</em></p>
 
-### Pipeline strip (overview figure)
-
-<p align="center">
-  <img src="assets/pipeline_strip.png" width="100%"/>
-</p>
+<details>
+<summary><b>Phase 1 — CrossNet + v1 Pix2Pix (early semester baseline)</b></summary>
 
 ### Phase 1 — CrossNet + v1 Pix2Pix (historical showcase)
 
@@ -461,6 +461,8 @@ Same tile: **aerial · generated · ground truth** (GT pano not used at inferenc
 </p>
 
 <p align="center"><em>Left: step 1 · Centre: ~100k steps · Right: ~197k steps (<code>G_step0197766</code> warm-start for Phase 2 Pix2Pix).</em></p>
+
+</details>
 
 ---
 
