@@ -1,0 +1,79 @@
+\documentclass[11pt]{article}
+
+% ---------------------------------------------------------------- layout and fonts
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+
+% ---------------------------------------------------------------- math, tables, numbers
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{siunitx}
+\sisetup{
+  retain-explicit-plus = true,
+  group-separator      = {,},
+  group-minimum-digits = 4,
+}
+
+% ---------------------------------------------------------------- figures
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{subcaption}
+
+% ---------------------------------------------------------------- colour (Okabe-Ito palette)
+\usepackage[dvipsnames]{xcolor}
+\definecolor{oiBlack}{HTML}{000000}
+\definecolor{oiOrange}{HTML}{E69F00}
+\definecolor{oiSkyBlue}{HTML}{56B4E9}
+\definecolor{oiGreen}{HTML}{009E73}
+\definecolor{oiYellow}{HTML}{F0E442}
+\definecolor{oiBlue}{HTML}{0072B2}
+\definecolor{oiVermillion}{HTML}{D55E00}
+\definecolor{oiPurple}{HTML}{CC79A7}
+
+% ---------------------------------------------------------------- citations and links
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[colorlinks=true,linkcolor=oiBlue,citecolor=oiBlue,urlcolor=oiBlue]{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}
+
+% ---------------------------------------------------------------- project macros
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+\input{numbers}
+
+% ---------------------------------------------------------------- front matter
+\title{What Matters in Layout-Bottlenecked Satellite-to-Street View Synthesis?\\
+A Low-Cost, Reproducible Study with Frozen Foundation Features}
+\author{\todo{author names, affiliations, emails}}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\input{sections/introduction}
+\input{sections/related_work}
+\input{sections/method}
+\input{sections/setup}
+\input{sections/results}
+\input{sections/diagnostics}
+\input{sections/discussion}
+\input{sections/conclusion}
+\input{sections/reproducibility}
+\input{sections/acknowledgements}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\clearpage
+\appendix
+\input{sections/appendix}
+
+\end{document}
