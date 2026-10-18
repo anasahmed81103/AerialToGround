@@ -38,6 +38,9 @@
 
 % ------------------------------------------------------------------ links and references
 \usepackage[colorlinks=true,linkcolor=oiBlue,citecolor=oiBlue,urlcolor=oiBlue]{hyperref}
+\hypersetup{pdftitle={Layout, Geometry or Generator? Dissecting Two-Stage Satellite-to-Street View Synthesis with Frozen Foundation Features},
+  pdfauthor={Muhammad Anas Ahmed Shaikh, Hamdan Vohra},
+  pdfkeywords={satellite-to-street view synthesis, cross-view image synthesis, CVUSA, DINOv2, SPADE, semantic layout}}
 \usepackage[capitalise,noabbrev]{cleveref}
 
 \setlength{\textfloatsep}{10pt plus 2pt minus 3pt}
@@ -68,8 +71,9 @@
 }
 
 % ------------------------------------------------------------------ front matter
-\title{What Matters in Layout-Bottlenecked Satellite-to-Street View Synthesis?\\
-A Low-Cost, Reproducible Study with Frozen Foundation Features}
+\title{Layout, Geometry or Generator?\\
+Dissecting Two-Stage Satellite-to-Street View Synthesis\\
+with Frozen Foundation Features}
 \author{%
   {\normalsize Muhammad Anas Ahmed Shaikh$^{1,\ast}$}\quad
   {\normalsize Hamdan Vohra$^{1}$}\\[5pt]
@@ -85,18 +89,20 @@ A Low-Cost, Reproducible Study with Frozen Foundation Features}
 \maketitle
 
 \begin{abstract}
-Satellite-to-street view synthesis asks a model to produce a ground-level panorama from an overhead tile. On
-CVUSA, we study a deliberately simple two-stage pipeline in which a predicted semantic layout is the only
-scene-structure signal, and we measure which design choices matter. Stage~1, a 1.53M-parameter PolarLayoutNet
-on frozen DINOv2 features, reaches 0.514 mIoU against SegFormer pseudo-labels, $+0.112$ over CrossNet
-retrained on the same labels. Ablations show that DINOv2 instead of VGG-16 ($+0.028$) and the full tile
-instead of a 224\,px crop ($+0.012$) matter, while polar versus dense mapping, a ground-plane prior and
-learned offsets change mIoU by at most 0.001. In Stage~2, adding a geometrically warped aerial image to SPADE
-conditioning lowers LPIPS with both predicted and oracle layouts (paired 95\% bootstrap intervals exclude
-zero), and swapping oracle for predicted layouts raises clean-FID from 141.0 to 182.1, the largest gap we
-measure. Our clean-FID remains far behind published methods (24--41 under different protocols); labels are
-pseudo-labels, building IoU is 0.21, we use one dataset and one training seed, and the adversarial term was
-largely inactive after early training. Code, logs, checkpoints and the evaluation harness are released.
+Satellite-to-street view synthesis asks a model to imagine a ground-level panorama from a single overhead tile.
+We dissect a two-stage pipeline on CVUSA, in which a semantic layout predicted from the tile guides a
+conditional generator, and measure which design choices actually matter. Stage~1, a lightweight PolarLayoutNet
+(1.53M trainable parameters) on frozen DINOv2 features, reaches 0.514 mIoU against SegFormer pseudo-labels,
+$+0.112$ over a CrossNet retrained on the same labels. The backbone ($+0.028$ over VGG-16) and full-tile input
+($+0.012$ over a 224\,px crop) drive this gain, whereas the polar mapping, ground-plane prior and learned
+offsets change mIoU by at most 0.001. In Stage~2, conditioning SPADE on a geometrically warped aerial image
+consistently helps: LPIPS falls for 87.0\% of test images with oracle layouts and 85.3\% with predicted ones,
+with paired 95\% bootstrap intervals excluding zero. With oracle layouts, clean-FID drops from 167.4 for a
+Pix2Pix baseline to 141.0 (116.2 under our earlier development harness, which is not directly comparable);
+end-to-end with predicted layouts it is 182.1. This oracle-to-predicted gap is the largest effect we measure
+and identifies layout quality as the main lever for improvement. Published methods remain ahead (FID 24--41
+under different protocols), and our labels are pseudo-labels from one dataset and one training seed. The
+study used 47.8 logged GPU-hours; code, logs, checkpoints and the evaluation harness are released.
 \end{abstract}
 
 % ==================================================================================================
@@ -709,7 +715,8 @@ not the late collapse, so the reported generators should be read as mostly recon
 \end{table}
 
 \paragraph{Where the pipeline stands.} Our end-to-end clean-FID of 182.1 is far behind the published FID range
-of 24--41 (\cref{tab:published}), even allowing for protocol differences. Our higher SSIM and PSNR do not
+of 24--41 (\cref{tab:published}), and we expect protocol differences to explain only part of a gap this large.
+Our higher SSIM and PSNR do not
 indicate better synthesis: these metrics reward smooth outputs, and our samples are visibly blurrier
 (\cref{fig:grid}).
 
@@ -744,8 +751,8 @@ baseline against which better layout prediction can be tested.
 
 \section*{Reproducibility and Data Statement}
 Code, configuration files, training logs, the Stage~1 and Stage~2 checkpoints and the evaluation harness are
-released at \url{https://github.com/anasahmed81103/AerialToGround} (release v1.0.0) \todo{confirm the release
-and the Zenodo DOI are public before submission}. Every number in this paper was checked against the run
+released at \url{https://github.com/anasahmed81103/AerialToGround} (release v1.0.0) and archived at
+\url{https://doi.org/10.5281/zenodo.23433525}. Every number in this paper was checked against the run
 artefacts by a script shipped with the paper source (\texttt{paper/tools.py}). CVUSA was obtained from the
 authors' shared Dropbox folder (\texttt{cvusa\_sharing}), following a data-access request to Nathan Jacobs
 (Washington University in St. Louis), is used for research under its terms, and is not redistributed by us; the
@@ -753,15 +760,14 @@ figures show \num{17} distinct test images, identified in their captions.
 
 \section*{Author Contributions}
 A.A. and H.V. jointly developed the original CrossNet and Pix2Pix baselines in a shared course project. A.A.
-designed and implemented Stages~1 and~2, ran all experiments and analyses, and wrote the paper \todo{confirm
-contributions with H.V.}.
+designed and implemented Stages~1 and~2, ran all experiments and analyses, and wrote the paper.
 
 \section*{Acknowledgements}
 This work began as a Computer Vision course project at FAST-NUCES; the original CrossNet checkpoint and the
 Pix2Pix initialisation of Config A come from that project. This research received no external funding; cloud
 GPU time was paid for personally by the first author. AI assistants (Cursor and Claude)
 were used to help write analysis code and to draft and edit the text; the authors checked all results and
-claims against the run artefacts and take responsibility for the content \todo{confirm venue policy}.
+claims against the run artefacts and take responsibility for the content.
 
 % ==================================================================================================
 \appendix
